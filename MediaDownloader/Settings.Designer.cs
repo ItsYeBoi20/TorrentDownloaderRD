@@ -39,6 +39,7 @@
             this.checkBox_Remove = new System.Windows.Forms.CheckBox();
             this.label1 = new System.Windows.Forms.Label();
             this.checkedListBox_Providers = new CustomCheckedListBox();
+            this.label2 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_Pages)).BeginInit();
             this.SuspendLayout();
             // 
@@ -175,12 +176,25 @@
             this.checkedListBox_Providers.Size = new System.Drawing.Size(354, 130);
             this.checkedListBox_Providers.TabIndex = 9;
             // 
+            // label2
+            // 
+            this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.label2.AutoSize = true;
+            this.label2.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Underline, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label2.Location = new System.Drawing.Point(372, 209);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(94, 15);
+            this.label2.TabIndex = 12;
+            this.label2.Text = "Current Version: ";
+            this.label2.Click += new System.EventHandler(this.label2_Click);
+            // 
             // Settings
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Window;
             this.ClientSize = new System.Drawing.Size(536, 282);
+            this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.checkedListBox_Providers);
             this.Controls.Add(this.checkBox_Remove);
@@ -217,5 +231,6 @@
         private System.Windows.Forms.CheckBox checkBox_Remove;
         private CustomCheckedListBox checkedListBox_Providers;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label label2;
     }
 }

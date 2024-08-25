@@ -1,7 +1,10 @@
 ﻿using RealDebridAPI;
 using System;
 using System.IO;
+using System.Net.Http;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace MediaDownloader
@@ -12,10 +15,13 @@ namespace MediaDownloader
         private static extern IntPtr LoadCursor(IntPtr hInstance, int lpCursorName);
         private const int IDC_HAND = 32649;
 
+        public static string currentVersion = "1.0.0";
+
         public Settings()
         {
             InitializeComponent();
             label1.Cursor = new Cursor(LoadCursor(IntPtr.Zero, IDC_HAND));
+            label2.Cursor = new Cursor(LoadCursor(IntPtr.Zero, IDC_HAND));
         }
 
         private void button_Edit_Click(object sender, EventArgs e)
@@ -69,6 +75,8 @@ namespace MediaDownloader
 
         private void Settings_Load(object sender, EventArgs e)
         {
+            label2.Text = "Current Version: " + currentVersion;
+
             if (File.Exists("Settings.txt"))
             {
                 string[] lines = File.ReadAllLines("Settings.txt");
@@ -118,6 +126,54 @@ namespace MediaDownloader
             {
                 MessageBox.Show("Textbox is Empty!");
             }
+        }
+
+        private async void label2_Click(object sender, EventArgs e)
+        {
+            await CheckForUpdateAsync();
+        }
+
+        private async Task CheckForUpdateAsync()
+        {
+            string latestVersion = await GetLatestVersionAsync();
+
+            if (latestVersion != null && latestVersion != currentVersion)
+            {
+                MessageBox.Show($"A new version ({latestVersion}) is available! Please update.");
+            }
+            else if (latestVersion != null && latestVersion == currentVersion)
+            {
+                MessageBox.Show("You are using the latest version.");
+            }
+            else
+            {
+                MessageBox.Show("Error getting current version!");
+            }
+        }
+
+        private async Task<string> GetLatestVersionAsync()
+        {
+            string fileUrl = "https://raw.githubusercontent.com/ItsYeBoi20/TorrentDownloaderRD/main/MediaDownloader/Settings.cs";
+            using (HttpClient client = new HttpClient())
+            {
+                try
+                {
+                    string fileContent = await client.GetStringAsync(fileUrl);
+                    return ExtractVersion(fileContent);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error fetching version: {ex.Message}");
+                    return null;
+                }
+            }
+        }
+
+        private string ExtractVersion(string fileContent)
+        {
+            string pattern = @"public\s+static\s+string\s+currentVersion\s*=\s*""([^""]+)"";";
+            Match match = Regex.Match(fileContent, pattern);
+            return match.Success ? match.Groups[1].Value : null;
         }
     }
 }
