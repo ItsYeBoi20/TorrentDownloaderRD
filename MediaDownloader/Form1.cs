@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -10,13 +9,8 @@ using System.IO;
 using MediaDownloader.Scrapers;
 using System.Drawing;
 using System.Runtime.InteropServices;
-using System.Net;
 using System.Text.RegularExpressions;
 using System.Collections;
-using System.Net.Http;
-using RealDebridAPI;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
-using System.Diagnostics;
 
 namespace MediaDownloader
 {
@@ -737,7 +731,6 @@ namespace MediaDownloader
                 && !searchTorrentsCSV && !searchTorrentDownload && !searchYourBittorrent && !searchTorrentGalaxy && !searchBitSearch && !searchTheRarbg)
             {
                 MessageBox.Show("No search provider selected. Please enable at least one search provider in the settings.");
-                return;
             }
 
             var tasks = new List<Task>();

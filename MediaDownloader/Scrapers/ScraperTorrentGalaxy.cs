@@ -5,19 +5,27 @@ using System.IO.Compression;
 using System.IO;
 using System.Text;
 using System.Net;
+using System.Net.Http;
 
 namespace MediaDownloader.Scrapers
 {
     internal class ScraperTorrentGalaxy
     {
-        private static readonly string BaseUrl = "https://torrentgalaxy.to/";
-
         public static async Task ScrapeTorrentsAsync(string searchText, Action<TorrentInfo> updateCallback)
         {
             try
             {
-                WebClient wc = new WebClient();
-                wc.DownloadFile("https://torrentgalaxy.to/cache/tgx24hdump.txt.gz", "tgx24hdump.txt.gz");
+                using (HttpClient client = new HttpClient())
+                {
+                    var response = await client.GetAsync("https://torrentgalaxy.to/cache/tgx24hdump.txt.gz");
+                    response.EnsureSuccessStatusCode();
+
+                    using (var fileStream = new FileStream("tgx24hdump.txt.gz", FileMode.Create, FileAccess.Write, FileShare.None))
+                    {
+                        await response.Content.CopyToAsync(fileStream);
+                    }
+                }
+
                 string content = ReadGzFileContents("tgx24hdump.txt.gz");
 
                 string[] lines = content.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
@@ -57,8 +65,9 @@ namespace MediaDownloader.Scrapers
             catch (Exception ex)
             {
                 //Console.WriteLine($"Error scraping TorrentGalaxy: {ex.Message}");
-            }            
+            }
         }
+
 
         public static long ConvertToBytes(string sizeText)
         {
