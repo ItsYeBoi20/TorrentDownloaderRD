@@ -733,6 +733,13 @@ namespace MediaDownloader
                 }
             }
 
+            if (!search1337x && !searchLimeTorrents && !searchNyaa && !searchPiratebay && !searchTorlock2 && !searchTorrentProject
+                && !searchTorrentsCSV && !searchTorrentDownload && !searchYourBittorrent && !searchTorrentGalaxy && !searchBitSearch && !searchTheRarbg)
+            {
+                MessageBox.Show("No search provider selected. Please enable at least one search provider in the settings.");
+                return;
+            }
+
             var tasks = new List<Task>();
 
             if (search1337x)
