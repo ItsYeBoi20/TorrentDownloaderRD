@@ -101,6 +101,10 @@ namespace MediaDownloader
                 MessageBox.Show("Operation is already in progress.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
+            else
+            {
+                lstDownloadLinks.Items.Clear();
+            }
             _isOperationRunning = true;
 
             bool cancelled = false;
@@ -158,7 +162,7 @@ namespace MediaDownloader
                             {
                                 if (check == false)
                                 {
-                                    MessageBox.Show("Download is Starting");
+                                    MessageBox.Show("Download to the Real-Debrid Server is Starting");
                                     check = true;
                                 }
 
@@ -183,16 +187,27 @@ namespace MediaDownloader
                                         {
                                             string downloadLinksToCopy = "";
 
-                                            // Display download links to the user
-                                            foreach (var linkInfo in downloadLinks)
+                                            if (selectedFileIds.Length != downloadLinks.Count)
                                             {
-                                                lstDownloadLinks.Items.Add($"{linkInfo.FileName}: {linkInfo.DownloadLink}");
-                                                downloadLinksToCopy += linkInfo.DownloadLink + " ";
+                                                // Display download links to the user by unrestricting the link
+                                                foreach (var linkInfo in downloadLinks)
+                                                {
+                                                    string fileName = await _realDebridClient.GetFileName(linkInfo.DownloadLink);
+
+                                                    lstDownloadLinks.Items.Add($"{fileName}: {linkInfo.DownloadLink}");
+                                                    downloadLinksToCopy += linkInfo.DownloadLink + " ";
+                                                }
+                                            }
+                                            else
+                                            {
+                                                // Display download links to the user
+                                                foreach (var linkInfo in downloadLinks)
+                                                {
+                                                    lstDownloadLinks.Items.Add($"{linkInfo.FileName}: {linkInfo.DownloadLink}");
+                                                    downloadLinksToCopy += linkInfo.DownloadLink + " ";
+                                                }
                                             }
                                             System.Windows.Forms.Clipboard.SetText(downloadLinksToCopy);
-
-                                            linksOnUpload = true;
-                                            break;
                                         }                                        
                                     }
                                     catch
@@ -243,11 +258,25 @@ namespace MediaDownloader
 
                         string downloadLinksToCopy = "";
 
-                        // Display download links to the user
-                        foreach (var linkInfo in downloadLinks)
+                        if (selectedFileIds.Length != downloadLinks.Count)
                         {
-                            lstDownloadLinks.Items.Add($"{linkInfo.FileName}: {linkInfo.DownloadLink}");
-                            downloadLinksToCopy += linkInfo.DownloadLink + " ";
+                            // Display download links to the user by unrestricting the link
+                            foreach (var linkInfo in downloadLinks)
+                            {
+                                string fileName = await _realDebridClient.GetFileName(linkInfo.DownloadLink);
+
+                                lstDownloadLinks.Items.Add($"{fileName}: {linkInfo.DownloadLink}");
+                                downloadLinksToCopy += linkInfo.DownloadLink + " ";
+                            }
+                        }
+                        else
+                        {
+                            // Display download links to the user
+                            foreach (var linkInfo in downloadLinks)
+                            {
+                                lstDownloadLinks.Items.Add($"{linkInfo.FileName}: {linkInfo.DownloadLink}");
+                                downloadLinksToCopy += linkInfo.DownloadLink + " ";
+                            }
                         }
                         System.Windows.Forms.Clipboard.SetText(downloadLinksToCopy);
                     }
@@ -285,6 +314,11 @@ namespace MediaDownloader
             }
 
             _isOperationRunning = false;
+
+            if (lstDownloadLinks.Items.Count > 0)
+            {
+                button1.Enabled = true;
+            }
         }
 
         private void Timer_Tick(object sender, EventArgs e)
@@ -318,6 +352,7 @@ namespace MediaDownloader
 
                 if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
                 {
+                    MessageBox.Show("Download is Starting");
                     string downloadDirectory = folderBrowserDialog.SelectedPath;
                     await DownloadFilesAsync(downloadDirectory);
                 }

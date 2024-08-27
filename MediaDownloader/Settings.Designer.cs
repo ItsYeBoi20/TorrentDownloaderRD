@@ -38,8 +38,8 @@
             this.label_Providers = new System.Windows.Forms.Label();
             this.checkBox_Remove = new System.Windows.Forms.CheckBox();
             this.label1 = new System.Windows.Forms.Label();
-            this.checkedListBox_Providers = new CustomCheckedListBox();
             this.label2 = new System.Windows.Forms.Label();
+            this.checkedListBox_Providers = new CustomCheckedListBox();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_Pages)).BeginInit();
             this.SuspendLayout();
             // 
@@ -150,6 +150,18 @@
             this.label1.Text = "Check Status";
             this.label1.Click += new System.EventHandler(this.label1_Click);
             // 
+            // label2
+            // 
+            this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.label2.AutoSize = true;
+            this.label2.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Underline, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label2.Location = new System.Drawing.Point(372, 209);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(94, 15);
+            this.label2.TabIndex = 12;
+            this.label2.Text = "Current Version: ";
+            this.label2.Click += new System.EventHandler(this.label2_Click);
+            // 
             // checkedListBox_Providers
             // 
             this.checkedListBox_Providers.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -170,23 +182,12 @@
             "YourBittorrent",
             "TorrentGalaxy",
             "BitSearch",
-            "TheRarbg"});
+            "TheRarbg",
+            "FitGirl"});
             this.checkedListBox_Providers.Location = new System.Drawing.Point(12, 140);
             this.checkedListBox_Providers.Name = "checkedListBox_Providers";
             this.checkedListBox_Providers.Size = new System.Drawing.Size(354, 130);
             this.checkedListBox_Providers.TabIndex = 9;
-            // 
-            // label2
-            // 
-            this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.label2.AutoSize = true;
-            this.label2.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Underline, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.Location = new System.Drawing.Point(372, 209);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(94, 15);
-            this.label2.TabIndex = 12;
-            this.label2.Text = "Current Version: ";
-            this.label2.Click += new System.EventHandler(this.label2_Click);
             // 
             // Settings
             // 

@@ -38,6 +38,7 @@
 - **[Torrent Galaxy](https://torrentgalaxy.to/)**
 - **[BitSearch](https://bitsearch.to/)**
 - **[TheRarbg](https://therarbg.com/)**
+- **[FitGirl](https://fitgirl-repacks.site/)**
 
 ### Known Issues
 - **Nyaa.si**: Repeated attempts to open a specific file may result in temporary server blocks. Wait a few seconds and try again. This occurs only when trying to open the same file multiple times in quick succession.

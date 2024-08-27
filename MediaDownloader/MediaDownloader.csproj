@@ -281,6 +281,7 @@
     </Compile>
     <Compile Include="Scrapers\Scraper1337x.cs" />
     <Compile Include="Scrapers\ScraperBitSearch.cs" />
+    <Compile Include="Scrapers\ScraperFitGirl.cs" />
     <Compile Include="Scrapers\ScraperLimeTorrents.cs" />
     <Compile Include="Scrapers\ScraperNyaasi.cs" />
     <Compile Include="Scrapers\ScraperPirateBay.cs" />

@@ -25,6 +25,7 @@ namespace MediaDownloader
         public static Dictionary<string, string> magnetLinksCSV = new Dictionary<string, string>(); //torrents-csv magnet links
         public static Dictionary<string, string> magnetLinksPirate = new Dictionary<string, string>(); //piratebay magnet links
         public static Dictionary<string, string> magnetLinksGalaxy = new Dictionary<string, string>(); //torrentgalaxy magnet links
+        public static Dictionary<string, string> magnetLinksFitGirl = new Dictionary<string, string>(); //fitgirl magnet links
 
         public Main()
         {
@@ -527,6 +528,38 @@ namespace MediaDownloader
                                 c.Show();
                             }
                         }
+                        else if (url.Contains("fitgirl-repacks.site"))
+                        {
+                            string magnetLink = magnetLinksFitGirl.ContainsKey(name) ? magnetLinksFitGirl[name] : "Magnet link not found";
+                            string pattern = @"^magnet:\?xt=urn:[a-zA-Z0-9]+:[a-zA-Z0-9]{32,40}(&.*)?$";
+                            Regex regex = new Regex(pattern);
+                            if (regex.IsMatch(magnetLink))
+                            {
+                                success = true;
+                            }
+                            else
+                            {
+                                throw new Exception("Magnet link node not found");
+                            }
+
+                            if (success)
+                            {
+                                Data c = new Data();
+                                Data.TorrentName = name;
+                                Data.TorrentSize = size;
+                                Data.Seeders = seeders;
+                                Data.Leechers = leechers;
+                                Data.Url = url;
+                                Data.Magnet = magnetLink;
+                                Data.Description = "No Description Available";
+
+                                c.StartPosition = FormStartPosition.Manual;
+                                int x = this.Location.X + (this.Width - c.Width) / 2;
+                                int y = this.Location.Y + (this.Height - c.Height) / 2;
+                                c.Location = new Point(x, y);
+                                c.Show();
+                            }
+                        }
                         else
                         {
                             break;
@@ -669,6 +702,7 @@ namespace MediaDownloader
             bool searchTorrentGalaxy = false;
             bool searchBitSearch = false;
             bool searchTheRarbg = false;
+            bool searchFitGirl = false;
 
             if (File.Exists("Settings.txt"))
             {
@@ -686,49 +720,26 @@ namespace MediaDownloader
 
                         switch (itemText)
                         {
-                            case "1337x":
-                                search1337x = isChecked;
-                                break;
-                            case "LimeTorrents":
-                                searchLimeTorrents = isChecked;
-                                break;
-                            case "Nyaa":
-                                searchNyaa = isChecked;
-                                break;
-                            case "Piratebay":
-                                searchPiratebay = isChecked;
-                                break;
-                            case "Torlock2":
-                                searchTorlock2 = isChecked;
-                                break;
-                            case "TorrentProject":
-                                searchTorrentProject = isChecked;
-                                break;
-                            case "Torrents-CSV":
-                                searchTorrentsCSV = isChecked;
-                                break;
-                            case "TorrentDownload":
-                                searchTorrentDownload = isChecked;
-                                break;
-                            case "YourBittorrent":
-                                searchYourBittorrent = isChecked;
-                                break;
-                            case "TorrentGalaxy":
-                                searchTorrentGalaxy = isChecked;
-                                break;
-                            case "BitSearch":
-                                searchBitSearch = isChecked;
-                                break;
-                            case "TheRarbg":
-                                searchTheRarbg = isChecked;
-                                break;
+                            case "1337x": search1337x = isChecked; break;
+                            case "LimeTorrents": searchLimeTorrents = isChecked; break;
+                            case "Nyaa": searchNyaa = isChecked; break;
+                            case "Piratebay": searchPiratebay = isChecked; break;
+                            case "Torlock2": searchTorlock2 = isChecked; break;
+                            case "TorrentProject": searchTorrentProject = isChecked; break;
+                            case "Torrents-CSV": searchTorrentsCSV = isChecked; break;
+                            case "TorrentDownload": searchTorrentDownload = isChecked; break;
+                            case "YourBittorrent": searchYourBittorrent = isChecked; break;
+                            case "TorrentGalaxy": searchTorrentGalaxy = isChecked; break;
+                            case "BitSearch": searchBitSearch = isChecked; break;
+                            case "TheRarbg": searchTheRarbg = isChecked; break;
+                            case "FitGirl": searchFitGirl = isChecked; break;
                         }
                     }
                 }
             }
 
-            if (!search1337x && !searchLimeTorrents && !searchNyaa && !searchPiratebay && !searchTorlock2 && !searchTorrentProject
-                && !searchTorrentsCSV && !searchTorrentDownload && !searchYourBittorrent && !searchTorrentGalaxy && !searchBitSearch && !searchTheRarbg)
+            if (!search1337x && !searchLimeTorrents && !searchNyaa && !searchPiratebay && !searchTorlock2 && !searchTorrentProject && !searchTorrentsCSV && 
+                !searchTorrentDownload && !searchYourBittorrent && !searchTorrentGalaxy && !searchBitSearch && !searchTheRarbg && !searchFitGirl)
             {
                 MessageBox.Show("No search provider selected. Please enable at least one search provider in the settings.");
             }
@@ -782,6 +793,10 @@ namespace MediaDownloader
             if (searchTheRarbg)
             {
                 tasks.Add(ScraperTheRarbg.ScrapeTorrentsAsync(searchText, contentItem, sortByItem, websiteSearches, UpdateDataGridView));
+            }
+            if (searchFitGirl)
+            {
+                tasks.Add(ScraperFitGirl.ScrapeTorrentsAsync(searchText, UpdateDataGridView));
             }
 
             #endregion checkSettings

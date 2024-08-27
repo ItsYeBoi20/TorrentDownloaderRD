@@ -429,6 +429,38 @@ namespace RealDebridAPI
             return result.Download;
         }
 
+        /// <summary>
+        /// Unrestricts a given link and returns a direct downloadable link.
+        /// </summary>
+        /// <param name="link">The link to unrestrict.</param>
+        /// <returns>A direct download link.</returns>
+        public async Task<string> GetFileName(string link)
+        {
+            if (string.IsNullOrWhiteSpace(link))
+                throw new ArgumentException("Link cannot be null or empty.", nameof(link));
+
+            var content = new FormUrlEncodedContent(new[]
+            {
+                new KeyValuePair<string, string>("link", link)
+            });
+
+            var response = await _httpClient.PostAsync("unrestrict/link", content);
+
+            // Log detailed information in case of failure
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                MessageBox.Show($"Error during unrestricting link: {response.StatusCode} - {errorContent}");
+                //Console.WriteLine($"Error during unrestricting link: {response.StatusCode} - {errorContent}");
+                throw new Exception($"Failed to unrestrict link. Status Code: {response.StatusCode}, Response: {errorContent}");
+            }
+
+            var jsonString = await response.Content.ReadAsStringAsync();
+            var result = JsonConvert.DeserializeObject<UnrestrictLinkResponse>(jsonString);
+
+            return result.FileName;
+        }
+
         public void Dispose()
         {
             _httpClient?.Dispose();

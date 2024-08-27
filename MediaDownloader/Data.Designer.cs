@@ -43,7 +43,6 @@
             this.textBox5 = new System.Windows.Forms.TextBox();
             this.textBox6 = new System.Windows.Forms.TextBox();
             this.button_Insert = new System.Windows.Forms.Button();
-            this.lstDownloadLinks = new System.Windows.Forms.ListBox();
             this.label7 = new System.Windows.Forms.Label();
             this.textBox7 = new System.Windows.Forms.TextBox();
             this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
@@ -51,6 +50,7 @@
             this.speed_Label = new System.Windows.Forms.Label();
             this.button1 = new System.Windows.Forms.Button();
             this.progress_Label = new System.Windows.Forms.Label();
+            this.lstDownloadLinks = new CustomListBox();
             this.SuspendLayout();
             // 
             // button_Copy
@@ -211,19 +211,6 @@
             this.button_Insert.UseVisualStyleBackColor = true;
             this.button_Insert.Click += new System.EventHandler(this.button_Insert_Click);
             // 
-            // lstDownloadLinks
-            // 
-            this.lstDownloadLinks.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.lstDownloadLinks.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lstDownloadLinks.FormattingEnabled = true;
-            this.lstDownloadLinks.ItemHeight = 15;
-            this.lstDownloadLinks.Location = new System.Drawing.Point(12, 343);
-            this.lstDownloadLinks.Name = "lstDownloadLinks";
-            this.lstDownloadLinks.Size = new System.Drawing.Size(405, 94);
-            this.lstDownloadLinks.TabIndex = 17;
-            this.lstDownloadLinks.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.lstDownloadLinks_MouseDoubleClick);
-            // 
             // label7
             // 
             this.label7.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -274,6 +261,7 @@
             // button1
             // 
             this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.button1.Enabled = false;
             this.button1.Location = new System.Drawing.Point(172, 506);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(120, 45);
@@ -293,19 +281,31 @@
             this.progress_Label.TabIndex = 24;
             this.progress_Label.Text = "Retrieved Links:";
             // 
+            // lstDownloadLinks
+            // 
+            this.lstDownloadLinks.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.lstDownloadLinks.FormattingEnabled = true;
+            this.lstDownloadLinks.Location = new System.Drawing.Point(12, 343);
+            this.lstDownloadLinks.Name = "lstDownloadLinks";
+            this.lstDownloadLinks.Size = new System.Drawing.Size(405, 82);
+            this.lstDownloadLinks.Sorted = true;
+            this.lstDownloadLinks.TabIndex = 25;
+            this.lstDownloadLinks.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.lstDownloadLinks_MouseDoubleClick);
+            // 
             // Data
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Window;
             this.ClientSize = new System.Drawing.Size(429, 563);
+            this.Controls.Add(this.lstDownloadLinks);
             this.Controls.Add(this.progress_Label);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.speed_Label);
             this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.textBox7);
             this.Controls.Add(this.label7);
-            this.Controls.Add(this.lstDownloadLinks);
             this.Controls.Add(this.button_Insert);
             this.Controls.Add(this.textBox6);
             this.Controls.Add(this.textBox5);
@@ -347,7 +347,6 @@
         private System.Windows.Forms.TextBox textBox5;
         private System.Windows.Forms.TextBox textBox6;
         private System.Windows.Forms.Button button_Insert;
-        private System.Windows.Forms.ListBox lstDownloadLinks;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.TextBox textBox7;
         private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog1;
@@ -355,5 +354,6 @@
         private System.Windows.Forms.Label speed_Label;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Label progress_Label;
+        private CustomListBox lstDownloadLinks;
     }
 }

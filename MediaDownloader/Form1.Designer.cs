@@ -158,6 +158,11 @@
             0,
             0,
             0});
+            this.numericUpDown_Seeders.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            -2147483648});
             this.numericUpDown_Seeders.Name = "numericUpDown_Seeders";
             this.numericUpDown_Seeders.Size = new System.Drawing.Size(75, 23);
             this.numericUpDown_Seeders.TabIndex = 9;

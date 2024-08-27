@@ -15,7 +15,7 @@ namespace MediaDownloader
         private static extern IntPtr LoadCursor(IntPtr hInstance, int lpCursorName);
         private const int IDC_HAND = 32649;
 
-        public static string currentVersion = "1.0.0";
+        public static string currentVersion = "1.0.1";
 
         public Settings()
         {
@@ -137,19 +137,45 @@ namespace MediaDownloader
         {
             string latestVersion = await GetLatestVersionAsync();
 
-            if (latestVersion != null && latestVersion != currentVersion)
+            if (latestVersion != null)
             {
-                MessageBox.Show($"A new version ({latestVersion}) is available! Please update.");
-            }
-            else if (latestVersion != null && latestVersion == currentVersion)
-            {
-                MessageBox.Show("You are using the latest version.");
+                if (IsNewerVersion(latestVersion, currentVersion))
+                {
+                    MessageBox.Show($"A new version ({latestVersion}) is available! Please update.");
+                }
+                else
+                {
+                    MessageBox.Show("You are using the latest version.");
+                }
             }
             else
             {
                 MessageBox.Show("Error getting current version!");
             }
         }
+
+        private bool IsNewerVersion(string latestVersion, string currentVersion)
+        {
+            string[] latestVersionParts = latestVersion.Split('.');
+            string[] currentVersionParts = currentVersion.Split('.');
+
+            for (int i = 0; i < Math.Max(latestVersionParts.Length, currentVersionParts.Length); i++)
+            {
+                int latestPart = i < latestVersionParts.Length ? int.Parse(latestVersionParts[i]) : 0;
+                int currentPart = i < currentVersionParts.Length ? int.Parse(currentVersionParts[i]) : 0;
+
+                if (latestPart > currentPart)
+                {
+                    return true;
+                }
+                else if (latestPart < currentPart)
+                {
+                    return false;
+                }
+            }
+            return false; // Versions are equal
+        }
+
 
         private async Task<string> GetLatestVersionAsync()
         {
