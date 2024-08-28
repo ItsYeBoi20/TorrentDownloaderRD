@@ -42,3 +42,8 @@
 
 ### Known Issues
 - **Nyaa.si**: Repeated attempts to open a specific file may result in temporary server blocks. Wait a few seconds and try again. This occurs only when trying to open the same file multiple times in quick succession.
+
+
+![MainWindow](https://github.com/user-attachments/assets/0fe40bbb-3982-4052-934d-3984e922f038)
+![Data](https://github.com/user-attachments/assets/24980c3d-b0de-44b4-b4d2-81c74856619f)
+![Settings](https://github.com/user-attachments/assets/ad0caf61-b50f-442c-90bf-c362b6aad937)
