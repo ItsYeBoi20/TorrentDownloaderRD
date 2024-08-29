@@ -285,16 +285,22 @@
     </Compile>
     <Compile Include="Scrapers\Scraper1337x.cs" />
     <Compile Include="Scrapers\ScraperBitSearch.cs" />
+    <Compile Include="Scrapers\ScraperDodi.cs" />
+    <Compile Include="Scrapers\ScraperEmpress.cs" />
     <Compile Include="Scrapers\ScraperFitGirl.cs" />
+    <Compile Include="Scrapers\ScraperGOG.cs" />
     <Compile Include="Scrapers\ScraperLimeTorrents.cs" />
     <Compile Include="Scrapers\ScraperNyaasi.cs" />
+    <Compile Include="Scrapers\ScraperOnlineFix.cs" />
     <Compile Include="Scrapers\ScraperPirateBay.cs" />
     <Compile Include="Scrapers\ScraperTheRarbg.cs" />
+    <Compile Include="Scrapers\ScraperTinyRepacks.cs" />
     <Compile Include="Scrapers\ScraperTorlock.cs" />
     <Compile Include="Scrapers\ScraperTorrentDownload.cs" />
     <Compile Include="Scrapers\ScraperTorrentGalaxy.cs" />
     <Compile Include="Scrapers\ScraperTorrentProject.cs" />
     <Compile Include="Scrapers\ScraperTorrentsCSV.cs" />
+    <Compile Include="Scrapers\ScraperXatab.cs" />
     <Compile Include="Scrapers\ScraperYourBittorent.cs" />
     <Compile Include="Settings.cs">
       <SubType>Form</SubType>

@@ -7,9 +7,9 @@ using Newtonsoft.Json.Linq;
 
 namespace MediaDownloader.Scrapers
 {
-    internal class ScraperFitGirl
+    internal class ScraperTinyRepacks
     {
-        private const string SearchUrl = "https://hydralinks.cloud/sources/fitgirl.json";
+        private const string SearchUrl = "https://hydralinks.cloud/sources/tinyrepacks.json";
 
         public static async Task ScrapeTorrentsAsync(string searchText, Action<TorrentInfo> updateCallback)
         {
@@ -33,12 +33,12 @@ namespace MediaDownloader.Scrapers
                             string name = result["title"].ToString();
 
                             // Store the magnet link in the dictionary
-                            Main.magnetLinksFitGirl[name] = magnetLink;
+                            Main.magnetLinksTinyRepacks[name] = magnetLink;
 
                             var torrentInfo = new TorrentInfo
                             {
                                 Name = name,
-                                Url = "FitGirl",
+                                Url = "TinyRepacks",
                                 Size = size,
                                 Seeders = 0, // Seeders are not provided
                                 Leechers = 0, // Leechers are not provided
@@ -52,7 +52,7 @@ namespace MediaDownloader.Scrapers
             }
             catch (Exception ex)
             {
-                // Console.WriteLine($"Error scraping FitGirl Repacks: {ex.Message}");
+                // Console.WriteLine($"Error scraping TinyRepacks Repacks: {ex.Message}");
             }
         }
 

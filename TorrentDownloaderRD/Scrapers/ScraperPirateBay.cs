@@ -2,6 +2,7 @@
 using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace MediaDownloader.Scrapers
 {
@@ -19,54 +20,41 @@ namespace MediaDownloader.Scrapers
             else if (contentItem == "Games") { ContentItemParsed = "&cat=401"; }
             else if (contentItem == "XXX") { ContentItemParsed = "&cat=501"; }
 
-            int resultsFetched = 0;
-            int page = 0;
-
-            while (resultsFetched < numberOfResults)
+            string BaseUrl = "https://apibay.org";
+            string url = "";
+            if (ContentItemParsed != "")
             {
-                string BaseUrl = "https://apibay.org";
-                string url = "";
-                if (ContentItemParsed != "")
+                url = $"{BaseUrl}/q.php?q={searchText.Replace(" ", "+")}{ContentItemParsed}";
+            }
+            else if (ContentItemParsed == "")
+            {
+                url = $"{BaseUrl}/q.php?q={searchText.Replace(" ", "+")}";
+            }
+
+            var response = await httpClient.GetStringAsync(url);
+            var torrents = JArray.Parse(response);
+
+            foreach (var torrent in torrents)
+            {
+                if (torrent["id"] == null || torrent["info_hash"] == null) continue;
+
+                var name = torrent["name"].ToString();
+                var magnetLink = $"magnet:?xt=urn:btih:{torrent["info_hash"]}";
+
+                // Store the magnet link in the dictionary using the torrent name as the key
+                Main.magnetLinksPirate[name] = magnetLink;
+
+                var torrentInfo = new TorrentInfo
                 {
-                    url = $"{BaseUrl}/q.php?q={searchText.Replace(" ", "+")}{ContentItemParsed}";
-                }
-                else if (ContentItemParsed == "")
-                {
-                    url = $"{BaseUrl}/q.php?q={searchText.Replace(" ", "+")}";
-                }
+                    Name = name,
+                    Size = ConvertBytesToReadableSize(long.Parse(torrent["size"].ToString())),
+                    Seeders = int.Parse(torrent["seeders"].ToString()),
+                    Leechers = int.Parse(torrent["leechers"].ToString()),
+                    Url = $"https://thepiratebay.org/description.php?id={torrent["id"]}",
+                    Magnet = magnetLink
+                };
 
-                var response = await httpClient.GetStringAsync(url);
-                var torrents = JArray.Parse(response);
-
-                if (torrents.Count == 0) break;
-
-                foreach (var torrent in torrents)
-                {
-                    if (resultsFetched >= numberOfResults) break;
-
-                    if (torrent["id"] == null || torrent["info_hash"] == null) continue;
-
-                    var name = torrent["name"].ToString();
-                    var magnetLink = $"magnet:?xt=urn:btih:{torrent["info_hash"]}";
-
-                    // Store the magnet link in the dictionary using the torrent name as the key
-                    Main.magnetLinksPirate[name] = magnetLink;
-
-                    var torrentInfo = new TorrentInfo
-                    {
-                        Name = name,
-                        Size = ConvertBytesToReadableSize(long.Parse(torrent["size"].ToString())),
-                        Seeders = int.Parse(torrent["seeders"].ToString()),
-                        Leechers = int.Parse(torrent["leechers"].ToString()),
-                        Url = $"https://thepiratebay.org/description.php?id={torrent["id"]}",
-                        Magnet = magnetLink
-                    };
-
-                    updateCallback?.Invoke(torrentInfo);
-                    resultsFetched++;
-                }
-
-                page++;
+                updateCallback?.Invoke(torrentInfo);
             }
         }
 

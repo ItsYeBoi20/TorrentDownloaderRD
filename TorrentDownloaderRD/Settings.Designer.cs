@@ -56,7 +56,7 @@
             // button_Save
             // 
             this.button_Save.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_Save.Location = new System.Drawing.Point(451, 227);
+            this.button_Save.Location = new System.Drawing.Point(451, 299);
             this.button_Save.Name = "button_Save";
             this.button_Save.Size = new System.Drawing.Size(73, 44);
             this.button_Save.TabIndex = 4;
@@ -76,7 +76,7 @@
             // button_Edit
             // 
             this.button_Edit.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_Edit.Location = new System.Drawing.Point(372, 227);
+            this.button_Edit.Location = new System.Drawing.Point(372, 299);
             this.button_Edit.Name = "button_Edit";
             this.button_Edit.Size = new System.Drawing.Size(73, 44);
             this.button_Edit.TabIndex = 3;
@@ -155,7 +155,7 @@
             this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.label2.AutoSize = true;
             this.label2.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Underline, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.Location = new System.Drawing.Point(372, 209);
+            this.label2.Location = new System.Drawing.Point(372, 281);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(94, 15);
             this.label2.TabIndex = 12;
@@ -183,10 +183,16 @@
             "TorrentGalaxy",
             "BitSearch",
             "TheRarbg",
-            "FitGirl"});
+            "FitGirl",
+            "Empress",
+            "Dodi",
+            "GOG",
+            "OnlineFix",
+            "TinyRepacks",
+            "Xatab"});
             this.checkedListBox_Providers.Location = new System.Drawing.Point(12, 140);
             this.checkedListBox_Providers.Name = "checkedListBox_Providers";
-            this.checkedListBox_Providers.Size = new System.Drawing.Size(354, 130);
+            this.checkedListBox_Providers.Size = new System.Drawing.Size(354, 202);
             this.checkedListBox_Providers.TabIndex = 9;
             // 
             // Settings
@@ -194,7 +200,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Window;
-            this.ClientSize = new System.Drawing.Size(536, 282);
+            this.ClientSize = new System.Drawing.Size(536, 354);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.checkedListBox_Providers);

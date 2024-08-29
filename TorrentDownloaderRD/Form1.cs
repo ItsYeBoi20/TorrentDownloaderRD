@@ -26,6 +26,12 @@ namespace MediaDownloader
         public static Dictionary<string, string> magnetLinksPirate = new Dictionary<string, string>(); //piratebay magnet links
         public static Dictionary<string, string> magnetLinksGalaxy = new Dictionary<string, string>(); //torrentgalaxy magnet links
         public static Dictionary<string, string> magnetLinksFitGirl = new Dictionary<string, string>(); //fitgirl magnet links
+        public static Dictionary<string, string> magnetLinksEmpress = new Dictionary<string, string>(); //empress magnet links
+        public static Dictionary<string, string> magnetLinksDodi = new Dictionary<string, string>(); //dodi magnet links
+        public static Dictionary<string, string> magnetLinksGOG = new Dictionary<string, string>(); //gog magnet links
+        public static Dictionary<string, string> magnetLinksOnlineFix = new Dictionary<string, string>(); //onlinefix magnet 
+        public static Dictionary<string, string> magnetLinksTinyRepacks = new Dictionary<string, string>(); //tinyrepacks magnet links
+        public static Dictionary<string, string> magnetLinksXatab = new Dictionary<string, string>(); //xatab magnet links
 
         public Main()
         {
@@ -65,6 +71,8 @@ namespace MediaDownloader
                 int seeders = int.Parse(selectedRow.Cells[2].Value.ToString());
                 int leechers = int.Parse(selectedRow.Cells[3].Value.ToString());
                 string url = selectedRow.Cells[4].Value.ToString();
+                string description = "Description not found";
+                string magnetLink = "Magnet link not found";
 
                 int maxRetries = 5; // Increased retries
                 int retries = 0;
@@ -80,10 +88,10 @@ namespace MediaDownloader
                             HtmlAgilityPack.HtmlDocument xToDoc = xToWeb.Load(url);
 
                             var magnetLinkNode = xToDoc.DocumentNode.SelectSingleNode("//*[@id='openPopup']");
-                            string magnetLink = magnetLinkNode != null ? magnetLinkNode.GetAttributeValue("href", "") : "Magnet link not found";
+                            magnetLink = magnetLinkNode != null ? magnetLinkNode.GetAttributeValue("href", "") : "Magnet link not found";
 
                             var descriptionNode = xToDoc.DocumentNode.SelectSingleNode("//*[@id='description']");
-                            string description = descriptionNode != null ? descriptionNode.InnerHtml : "Description not found";
+                            description = descriptionNode != null ? descriptionNode.InnerHtml : "Description not found";
 
                             string pattern = @"^magnet:\?xt=urn:[a-zA-Z0-9]+:[a-zA-Z0-9]{32,40}(&.*)?$";
                             Regex regex = new Regex(pattern);
@@ -94,24 +102,6 @@ namespace MediaDownloader
                             else
                             {
                                 throw new Exception("Magnet link node not found");
-                            }
-
-                            if (success)
-                            {
-                                Data c = new Data();
-                                Data.TorrentName = name;
-                                Data.TorrentSize = size;
-                                Data.Seeders = seeders;
-                                Data.Leechers = leechers;
-                                Data.Url = url;
-                                Data.Magnet = magnetLink;
-                                Data.Description = description;
-
-                                c.StartPosition = FormStartPosition.Manual;
-                                int x = this.Location.X + (this.Width - c.Width) / 2;
-                                int y = this.Location.Y + (this.Height - c.Height) / 2;
-                                c.Location = new Point(x, y);
-                                c.Show();
                             }
                         }
                         else if (url.Contains("nyaa.si"))
@@ -120,10 +110,10 @@ namespace MediaDownloader
                             HtmlAgilityPack.HtmlDocument nyaaDoc = nyaaWeb.Load(url);
 
                             var magnetLinkNode = nyaaDoc.DocumentNode.SelectSingleNode("/html/body/div/div[1]/div[3]/a[2]");
-                            string magnetLink = magnetLinkNode != null ? magnetLinkNode.GetAttributeValue("href", "") : "Magnet link not found";
+                            magnetLink = magnetLinkNode != null ? magnetLinkNode.GetAttributeValue("href", "") : "Magnet link not found";
 
                             var descriptionNode = nyaaDoc.DocumentNode.SelectSingleNode("/html/body/div/div[2]/div");
-                            string description = descriptionNode != null ? descriptionNode.InnerHtml : "Description not found";
+                            description = descriptionNode != null ? descriptionNode.InnerHtml : "Description not found";
 
                             string pattern = @"^magnet:\?xt=urn:[a-zA-Z0-9]+:[a-zA-Z0-9]{32,40}(&.*)?$";
                             Regex regex = new Regex(pattern);
@@ -134,24 +124,6 @@ namespace MediaDownloader
                             else
                             {
                                 throw new Exception("Magnet link node not found");
-                            }
-
-                            if (success)
-                            {
-                                Data c = new Data();
-                                Data.TorrentName = name;
-                                Data.TorrentSize = size;
-                                Data.Seeders = seeders;
-                                Data.Leechers = leechers;
-                                Data.Url = url;
-                                Data.Magnet = magnetLink;
-                                Data.Description = description;
-
-                                c.StartPosition = FormStartPosition.Manual;
-                                int x = this.Location.X + (this.Width - c.Width) / 2;
-                                int y = this.Location.Y + (this.Height - c.Height) / 2;
-                                c.Location = new Point(x, y);
-                                c.Show();
                             }
                         }
                         else if (url.Contains("limetorrents.lol"))
@@ -160,10 +132,10 @@ namespace MediaDownloader
                             HtmlAgilityPack.HtmlDocument limeDoc = limeWeb.Load(url);
 
                             var magnetLinkNode = limeDoc.DocumentNode.SelectSingleNode("//a[contains(@href, 'magnet:')]");
-                            string magnetLink = magnetLinkNode != null ? magnetLinkNode.GetAttributeValue("href", "") : "Magnet link not found";
+                            magnetLink = magnetLinkNode != null ? magnetLinkNode.GetAttributeValue("href", "") : "Magnet link not found";
 
                             var descriptionNode = limeDoc.DocumentNode.SelectSingleNode("//div[contains(@class, 'description')]");
-                            string description = descriptionNode != null ? descriptionNode.InnerHtml : "Description not found";
+                            description = descriptionNode != null ? descriptionNode.InnerHtml : "Description not found";
 
                             string pattern = @"^magnet:\?xt=urn:[a-zA-Z0-9]+:[a-zA-Z0-9]{32,40}(&.*)?$";
                             Regex regex = new Regex(pattern);
@@ -174,29 +146,11 @@ namespace MediaDownloader
                             else
                             {
                                 throw new Exception("Magnet link node not found");
-                            }
-
-                            if (success)
-                            {
-                                Data c = new Data();
-                                Data.TorrentName = name;
-                                Data.TorrentSize = size;
-                                Data.Seeders = seeders;
-                                Data.Leechers = leechers;
-                                Data.Url = url;
-                                Data.Magnet = magnetLink;
-                                Data.Description = description;
-
-                                c.StartPosition = FormStartPosition.Manual;
-                                int x = this.Location.X + (this.Width - c.Width) / 2;
-                                int y = this.Location.Y + (this.Height - c.Height) / 2;
-                                c.Location = new Point(x, y);
-                                c.Show();
                             }
                         }
                         else if (url.Contains("torrents-csv"))
                         {
-                            string magnetLink = magnetLinksCSV.ContainsKey(name) ? magnetLinksCSV[name] : "Magnet link not found";
+                            magnetLink = magnetLinksCSV.ContainsKey(name) ? magnetLinksCSV[name] : "Magnet link not found";
 
                             string pattern = @"^magnet:\?xt=urn:[a-zA-Z0-9]+:[a-zA-Z0-9]{32,40}(&.*)?$";
                             Regex regex = new Regex(pattern);
@@ -207,24 +161,6 @@ namespace MediaDownloader
                             else
                             {
                                 throw new Exception("Magnet link node not found");
-                            }
-
-                            if (success)
-                            {
-                                Data c = new Data();
-                                Data.TorrentName = name;
-                                Data.TorrentSize = size;
-                                Data.Seeders = seeders;
-                                Data.Leechers = leechers;
-                                Data.Url = url;
-                                Data.Magnet = magnetLink;
-                                Data.Description = "No Description Available";
-
-                                c.StartPosition = FormStartPosition.Manual;
-                                int x = this.Location.X + (this.Width - c.Width) / 2;
-                                int y = this.Location.Y + (this.Height - c.Height) / 2;
-                                c.Location = new Point(x, y);
-                                c.Show();
                             }
                         }
                         else if (url.Contains("torrentproject.cc"))
@@ -233,10 +169,10 @@ namespace MediaDownloader
                             HtmlAgilityPack.HtmlDocument tprojectDoc = tproject.Load(url);
 
                             var scraperTorrentProject = new ScraperTorrentProject();
-                            var magnetLink = await scraperTorrentProject.DownloadTorrentAsync(url);
+                            magnetLink = await scraperTorrentProject.DownloadTorrentAsync(url);
 
                             var descriptionNode = tprojectDoc.DocumentNode.SelectSingleNode("//div[contains(@class, 'description')]");
-                            string description = descriptionNode != null ? descriptionNode.InnerHtml : "Description not found";
+                            description = descriptionNode != null ? descriptionNode.InnerHtml : "Description not found";
 
                             string pattern = @"^magnet:\?xt=urn:[a-zA-Z0-9]+:[a-zA-Z0-9]{32,40}(&.*)?$";
                             Regex regex = new Regex(pattern);
@@ -247,30 +183,12 @@ namespace MediaDownloader
                             else
                             {
                                 throw new Exception("Magnet link node not found");
-                            }
-
-                            if (success)
-                            {
-                                Data c = new Data();
-                                Data.TorrentName = name;
-                                Data.TorrentSize = size;
-                                Data.Seeders = seeders;
-                                Data.Leechers = leechers;
-                                Data.Url = url;
-                                Data.Magnet = magnetLink;
-                                Data.Description = description;
-
-                                c.StartPosition = FormStartPosition.Manual;
-                                int x = this.Location.X + (this.Width - c.Width) / 2;
-                                int y = this.Location.Y + (this.Height - c.Height) / 2;
-                                c.Location = new Point(x, y);
-                                c.Show();
                             }
                         }
                         else if (url.Contains("thepiratebay.org"))
                         {
                             var pirateWeb = new HtmlAgilityPack.HtmlWeb();
-                            string magnetLink = magnetLinksPirate.ContainsKey(name) ? magnetLinksPirate[name] : "Magnet link not found";
+                            magnetLink = magnetLinksPirate.ContainsKey(name) ? magnetLinksPirate[name] : "Magnet link not found";
 
                             string pattern = @"^magnet:\?xt=urn:[a-zA-Z0-9]+:[a-zA-Z0-9]{32,40}(&.*)?$";
                             Regex regex = new Regex(pattern);
@@ -281,24 +199,6 @@ namespace MediaDownloader
                             else
                             {
                                 throw new Exception("Magnet link node not found");
-                            }
-
-                            if (success)
-                            {
-                                Data c = new Data();
-                                Data.TorrentName = name;
-                                Data.TorrentSize = size;
-                                Data.Seeders = seeders;
-                                Data.Leechers = leechers;
-                                Data.Url = url;
-                                Data.Magnet = magnetLink;
-                                Data.Description = "No Description Available";
-
-                                c.StartPosition = FormStartPosition.Manual;
-                                int x = this.Location.X + (this.Width - c.Width) / 2;
-                                int y = this.Location.Y + (this.Height - c.Height) / 2;
-                                c.Location = new Point(x, y);
-                                c.Show();
                             }
                         }
                         else if (url.Contains("torlock2.com"))
@@ -307,10 +207,10 @@ namespace MediaDownloader
                             HtmlAgilityPack.HtmlDocument tprojectDoc = tproject.Load(url);
 
                             var magnetLinkNode = tprojectDoc.DocumentNode.SelectSingleNode("/html/body/article/div[2]/div/div[2]/dl[3]/dd");
-                            string magnetLink = "magnet:?xt=urn:btih:" + magnetLinkNode.InnerHtml;
+                            magnetLink = "magnet:?xt=urn:btih:" + magnetLinkNode.InnerHtml;
 
                             var descriptionNode = tprojectDoc.DocumentNode.SelectSingleNode("//*[@id=\"description\"]/div[2]/blockquote");
-                            string description = descriptionNode != null ? descriptionNode.InnerHtml : "Description not found";
+                            description = descriptionNode != null ? descriptionNode.InnerHtml : "Description not found";
 
                             string pattern = @"^magnet:\?xt=urn:[a-zA-Z0-9]+:[a-zA-Z0-9]{32,40}(&.*)?$";
                             Regex regex = new Regex(pattern);
@@ -321,24 +221,6 @@ namespace MediaDownloader
                             else
                             {
                                 throw new Exception("Magnet link node not found");
-                            }
-
-                            if (success)
-                            {
-                                Data c = new Data();
-                                Data.TorrentName = name;
-                                Data.TorrentSize = size;
-                                Data.Seeders = seeders;
-                                Data.Leechers = leechers;
-                                Data.Url = url;
-                                Data.Magnet = magnetLink;
-                                Data.Description = description;
-
-                                c.StartPosition = FormStartPosition.Manual;
-                                int x = this.Location.X + (this.Width - c.Width) / 2;
-                                int y = this.Location.Y + (this.Height - c.Height) / 2;
-                                c.Location = new Point(x, y);
-                                c.Show();
                             }
                         }
                         else if (url.Contains("yourbittorrent.com"))
@@ -346,36 +228,31 @@ namespace MediaDownloader
                             var tproject = new HtmlAgilityPack.HtmlWeb();
                             HtmlAgilityPack.HtmlDocument tprojectDoc = tproject.Load(url);
 
-                            var magnetLinkNode = tprojectDoc.DocumentNode.SelectSingleNode("/html/body/div/div[1]/div[2]/div/div[2]/div[8]/div[2]/kbd");
-                            string magnetLink = "magnet:?xt=urn:btih:" + magnetLinkNode.InnerHtml;
+                            var magnetLinkNodes = tprojectDoc.DocumentNode.SelectNodes("/html/body/div/div[1]/div[2]/div/div[2]//kbd");
 
+                            magnetLink = null;
                             string pattern = @"^magnet:\?xt=urn:[a-zA-Z0-9]+:[a-zA-Z0-9]{32,40}(&.*)?$";
                             Regex regex = new Regex(pattern);
-                            if (regex.IsMatch(magnetLink))
+                            if (magnetLinkNodes != null)
+                            {
+                                foreach (var node in magnetLinkNodes)
+                                {
+                                    string potentialMagnetLink = "magnet:?xt=urn:btih:" + node.InnerHtml;
+                                    if (regex.IsMatch(potentialMagnetLink))
+                                    {
+                                        magnetLink = potentialMagnetLink;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if (magnetLink != null)
                             {
                                 success = true;
                             }
                             else
                             {
                                 throw new Exception("Magnet link node not found");
-                            }
-
-                            if (success)
-                            {
-                                Data c = new Data();
-                                Data.TorrentName = name;
-                                Data.TorrentSize = size;
-                                Data.Seeders = seeders;
-                                Data.Leechers = leechers;
-                                Data.Url = url;
-                                Data.Magnet = magnetLink;
-                                Data.Description = "No Description Available";
-
-                                c.StartPosition = FormStartPosition.Manual;
-                                int x = this.Location.X + (this.Width - c.Width) / 2;
-                                int y = this.Location.Y + (this.Height - c.Height) / 2;
-                                c.Location = new Point(x, y);
-                                c.Show();
                             }
                         }
                         else if (url.Contains("torrentdownload.info"))
@@ -384,7 +261,7 @@ namespace MediaDownloader
                             HtmlAgilityPack.HtmlDocument torrentDoc = torrentWeb.Load(url);
 
                             var magnetLinkNode = torrentDoc.DocumentNode.SelectSingleNode("/html/body/div/table[2]/tbody/tr[3]/td[2]");
-                            string magnetLink = "magnet:?xt=urn:btih:" + magnetLinkNode.InnerHtml;
+                            magnetLink = "magnet:?xt=urn:btih:" + magnetLinkNode.InnerHtml;
 
                             string pattern = @"^magnet:\?xt=urn:[a-zA-Z0-9]+:[a-zA-Z0-9]{32,40}(&.*)?$";
                             Regex regex = new Regex(pattern);
@@ -395,29 +272,11 @@ namespace MediaDownloader
                             else
                             {
                                 throw new Exception("Magnet link node not found");
-                            }
-
-                            if (success)
-                            {
-                                Data c = new Data();
-                                Data.TorrentName = name;
-                                Data.TorrentSize = size;
-                                Data.Seeders = seeders;
-                                Data.Leechers = leechers;
-                                Data.Url = url;
-                                Data.Magnet = magnetLink;
-                                Data.Description = "No Description Available";
-
-                                c.StartPosition = FormStartPosition.Manual;
-                                int x = this.Location.X + (this.Width - c.Width) / 2;
-                                int y = this.Location.Y + (this.Height - c.Height) / 2;
-                                c.Location = new Point(x, y);
-                                c.Show();
                             }
                         }
                         else if (url.Contains("torrentgalaxy.to"))
                         {
-                            string magnetLink = magnetLinksGalaxy.ContainsKey(name) ? magnetLinksGalaxy[name] : "Magnet link not found";
+                            magnetLink = magnetLinksGalaxy.ContainsKey(name) ? magnetLinksGalaxy[name] : "Magnet link not found";
                             string pattern = @"^magnet:\?xt=urn:[a-zA-Z0-9]+:[a-zA-Z0-9]{32,40}(&.*)?$";
                             Regex regex = new Regex(pattern);
                             if (regex.IsMatch(magnetLink))
@@ -427,24 +286,6 @@ namespace MediaDownloader
                             else
                             {
                                 throw new Exception("Magnet link node not found");
-                            }
-
-                            if (success)
-                            {
-                                Data c = new Data();
-                                Data.TorrentName = name;
-                                Data.TorrentSize = size;
-                                Data.Seeders = seeders;
-                                Data.Leechers = leechers;
-                                Data.Url = url;
-                                Data.Magnet = magnetLink;
-                                Data.Description = "No Description Available";
-
-                                c.StartPosition = FormStartPosition.Manual;
-                                int x = this.Location.X + (this.Width - c.Width) / 2;
-                                int y = this.Location.Y + (this.Height - c.Height) / 2;
-                                c.Location = new Point(x, y);
-                                c.Show();
                             }
                         }
                         else if (url.Contains("bitsearch.to"))
@@ -453,11 +294,11 @@ namespace MediaDownloader
                             HtmlAgilityPack.HtmlDocument xToDoc = xToWeb.Load(url);
 
                             var magnetLinkNode = xToDoc.DocumentNode.SelectSingleNode("//*[@id=\"alart-box\"]/div[1]/div[1]/div[3]/a[2]");
-                            string magnetLink = magnetLinkNode != null ? magnetLinkNode.GetAttributeValue("href", "") : "Magnet link not found";
+                            magnetLink = magnetLinkNode != null ? magnetLinkNode.GetAttributeValue("href", "") : "Magnet link not found";
                             magnetLink = magnetLink.Replace("&#x3D;", "=");
 
                             var descriptionNode = xToDoc.DocumentNode.SelectSingleNode("//*[@id='description']");
-                            string description = descriptionNode != null ? descriptionNode.InnerHtml : "Description not found";
+                            description = descriptionNode != null ? descriptionNode.InnerHtml : "Description not found";
 
                             string pattern = @"^magnet:\?xt=urn:[a-zA-Z0-9]+:[a-zA-Z0-9]{32,40}(&.*)?$";
                             Regex regex = new Regex(pattern);
@@ -468,24 +309,6 @@ namespace MediaDownloader
                             else
                             {
                                 throw new Exception("Magnet link node not found");
-                            }
-
-                            if (success)
-                            {
-                                Data c = new Data();
-                                Data.TorrentName = name;
-                                Data.TorrentSize = size;
-                                Data.Seeders = seeders;
-                                Data.Leechers = leechers;
-                                Data.Url = url;
-                                Data.Magnet = magnetLink;
-                                Data.Description = description;
-
-                                c.StartPosition = FormStartPosition.Manual;
-                                int x = this.Location.X + (this.Width - c.Width) / 2;
-                                int y = this.Location.Y + (this.Height - c.Height) / 2;
-                                c.Location = new Point(x, y);
-                                c.Show();
                             }
                         }
                         else if (url.Contains("therarbg.com"))
@@ -494,10 +317,10 @@ namespace MediaDownloader
                             HtmlAgilityPack.HtmlDocument xToDoc = xToWeb.Load(url);
 
                             var magnetLinkNode = xToDoc.DocumentNode.SelectSingleNode("//table[@class='detailTable']//a[contains(@href, 'magnet:')]");
-                            string magnetLink = magnetLinkNode != null ? magnetLinkNode.GetAttributeValue("href", "") : "Magnet link not found";
+                            magnetLink = magnetLinkNode != null ? magnetLinkNode.GetAttributeValue("href", "") : "Magnet link not found";
 
                             var descriptionNode = xToDoc.DocumentNode.SelectSingleNode("//*[@id='description']");
-                            string description = descriptionNode != null ? descriptionNode.InnerHtml : "Description not found";
+                            description = descriptionNode != null ? descriptionNode.InnerHtml : "Description not found";
 
                             string pattern = @"^magnet:\?xt=urn:[a-zA-Z0-9]+:[a-zA-Z0-9]{32,40}(&.*)?$";
                             Regex regex = new Regex(pattern);
@@ -508,29 +331,11 @@ namespace MediaDownloader
                             else
                             {
                                 throw new Exception("Magnet link node not found");
-                            }
-
-                            if (success)
-                            {
-                                Data c = new Data();
-                                Data.TorrentName = name;
-                                Data.TorrentSize = size;
-                                Data.Seeders = seeders;
-                                Data.Leechers = leechers;
-                                Data.Url = url;
-                                Data.Magnet = magnetLink;
-                                Data.Description = description;
-
-                                c.StartPosition = FormStartPosition.Manual;
-                                int x = this.Location.X + (this.Width - c.Width) / 2;
-                                int y = this.Location.Y + (this.Height - c.Height) / 2;
-                                c.Location = new Point(x, y);
-                                c.Show();
                             }
                         }
-                        else if (url.Contains("fitgirl-repacks.site"))
+                        else if (url.Equals("FitGirl"))
                         {
-                            string magnetLink = magnetLinksFitGirl.ContainsKey(name) ? magnetLinksFitGirl[name] : "Magnet link not found";
+                            magnetLink = magnetLinksFitGirl.ContainsKey(name) ? magnetLinksFitGirl[name] : "Magnet link not found";
                             string pattern = @"^magnet:\?xt=urn:[a-zA-Z0-9]+:[a-zA-Z0-9]{32,40}(&.*)?$";
                             Regex regex = new Regex(pattern);
                             if (regex.IsMatch(magnetLink))
@@ -541,23 +346,89 @@ namespace MediaDownloader
                             {
                                 throw new Exception("Magnet link node not found");
                             }
-
-                            if (success)
+                        }
+                        else if (url.Equals("Empress"))
+                        {
+                            magnetLink = magnetLinksEmpress.ContainsKey(name) ? magnetLinksEmpress[name] : "Magnet link not found";
+                            string pattern = @"^magnet:\?xt=urn:[a-zA-Z0-9]+:[a-zA-Z0-9]{32,40}(&.*)?$";
+                            Regex regex = new Regex(pattern);
+                            if (regex.IsMatch(magnetLink))
                             {
-                                Data c = new Data();
-                                Data.TorrentName = name;
-                                Data.TorrentSize = size;
-                                Data.Seeders = seeders;
-                                Data.Leechers = leechers;
-                                Data.Url = url;
-                                Data.Magnet = magnetLink;
-                                Data.Description = "No Description Available";
-
-                                c.StartPosition = FormStartPosition.Manual;
-                                int x = this.Location.X + (this.Width - c.Width) / 2;
-                                int y = this.Location.Y + (this.Height - c.Height) / 2;
-                                c.Location = new Point(x, y);
-                                c.Show();
+                                success = true;
+                            }
+                            else
+                            {
+                                throw new Exception("Magnet link node not found");
+                            }
+                        }
+                        else if (url.Equals("Dodi"))
+                        {
+                            magnetLink = magnetLinksDodi.ContainsKey(name) ? magnetLinksDodi[name] : "Magnet link not found";
+                            string pattern = @"^magnet:\?xt=urn:[a-zA-Z0-9]+:[a-zA-Z0-9]{32,40}(&.*)?$";
+                            Regex regex = new Regex(pattern);
+                            if (regex.IsMatch(magnetLink))
+                            {
+                                success = true;
+                            }
+                            else
+                            {
+                                throw new Exception("Magnet link node not found");
+                            }
+                        }
+                        else if (url.Equals("GOG"))
+                        {
+                            magnetLink = magnetLinksGOG.ContainsKey(name) ? magnetLinksGOG[name] : "Magnet link not found";
+                            string pattern = @"^magnet:\?xt=urn:[a-zA-Z0-9]+:[a-zA-Z0-9]{32,40}(&.*)?$";
+                            Regex regex = new Regex(pattern);
+                            if (regex.IsMatch(magnetLink))
+                            {
+                                success = true;
+                            }
+                            else
+                            {
+                                throw new Exception("Magnet link node not found");
+                            }
+                        }
+                        else if (url.Equals("OnlineFix"))
+                        {
+                            magnetLink = magnetLinksOnlineFix.ContainsKey(name) ? magnetLinksOnlineFix[name] : "Magnet link not found";
+                            string pattern = @"^magnet:\?xt=urn:[a-zA-Z0-9]+:[a-zA-Z0-9]{32,40}(&.*)?$";
+                            Regex regex = new Regex(pattern);
+                            if (regex.IsMatch(magnetLink))
+                            {
+                                success = true;
+                            }
+                            else
+                            {
+                                throw new Exception("Magnet link node not found");
+                            }
+                        }
+                        else if (url.Equals("TinyRepacks"))
+                        {
+                            magnetLink = magnetLinksTinyRepacks.ContainsKey(name) ? magnetLinksTinyRepacks[name] : "Magnet link not found";
+                            string pattern = @"^magnet:\?xt=urn:[a-zA-Z0-9]+:[a-zA-Z0-9]{32,40}(&.*)?$";
+                            Regex regex = new Regex(pattern);
+                            if (regex.IsMatch(magnetLink))
+                            {
+                                success = true;
+                            }
+                            else
+                            {
+                                throw new Exception("Magnet link node not found");
+                            }
+                        }
+                        else if (url.Equals("Xatab"))
+                        {
+                            magnetLink = magnetLinksXatab.ContainsKey(name) ? magnetLinksXatab[name] : "Magnet link not found";
+                            string pattern = @"^magnet:\?xt=urn:[a-zA-Z0-9]+:[a-zA-Z0-9]{32,40}(&.*)?$";
+                            Regex regex = new Regex(pattern);
+                            if (regex.IsMatch(magnetLink))
+                            {
+                                success = true;
+                            }
+                            else
+                            {
+                                throw new Exception("Magnet link node not found");
                             }
                         }
                         else
@@ -583,6 +454,21 @@ namespace MediaDownloader
                         }
                     }
                 }
+
+                Data c = new Data();
+                Data.TorrentName = name;
+                Data.TorrentSize = size;
+                Data.Seeders = seeders;
+                Data.Leechers = leechers;
+                Data.Url = url;
+                Data.Magnet = magnetLink;
+                Data.Description = description;
+
+                c.StartPosition = FormStartPosition.Manual;
+                int x = this.Location.X + (this.Width - c.Width) / 2;
+                int y = this.Location.Y + (this.Height - c.Height) / 2;
+                c.Location = new Point(x, y);
+                c.Show();
 
                 this.Text = formTitle + " | " + dataGridView_Torrents.Rows.Count + " Torrents Found";
             }
@@ -703,6 +589,12 @@ namespace MediaDownloader
             bool searchBitSearch = false;
             bool searchTheRarbg = false;
             bool searchFitGirl = false;
+            bool searchEmpress = false;
+            bool searchDodi = false;
+            bool searchGOG = false;
+            bool searchOnlineFix = false;
+            bool searchTinyRepacks = false;
+            bool searchXatab = false;
 
             if (File.Exists("Settings.txt"))
             {
@@ -733,13 +625,20 @@ namespace MediaDownloader
                             case "BitSearch": searchBitSearch = isChecked; break;
                             case "TheRarbg": searchTheRarbg = isChecked; break;
                             case "FitGirl": searchFitGirl = isChecked; break;
+                            case "Empress": searchEmpress = isChecked; break;
+                            case "Dodi": searchDodi = isChecked; break;
+                            case "GOG": searchGOG = isChecked; break;
+                            case "OnlineFix": searchOnlineFix = isChecked; break;
+                            case "TinyRepacks": searchTinyRepacks = isChecked; break;
+                            case "Xatab": searchXatab = isChecked; break;
                         }
                     }
                 }
             }
 
             if (!search1337x && !searchLimeTorrents && !searchNyaa && !searchPiratebay && !searchTorlock2 && !searchTorrentProject && !searchTorrentsCSV && 
-                !searchTorrentDownload && !searchYourBittorrent && !searchTorrentGalaxy && !searchBitSearch && !searchTheRarbg && !searchFitGirl)
+                !searchTorrentDownload && !searchYourBittorrent && !searchTorrentGalaxy && !searchBitSearch && !searchTheRarbg && !searchFitGirl && 
+                !searchEmpress && !searchDodi && !searchGOG && !searchOnlineFix && !searchTinyRepacks && !searchXatab)
             {
                 MessageBox.Show("No search provider selected. Please enable at least one search provider in the settings.");
             }
@@ -797,6 +696,30 @@ namespace MediaDownloader
             if (searchFitGirl)
             {
                 tasks.Add(ScraperFitGirl.ScrapeTorrentsAsync(searchText, UpdateDataGridView));
+            }
+            if (searchEmpress)
+            {
+                tasks.Add(ScraperEmpress.ScrapeTorrentsAsync(searchText, UpdateDataGridView));
+            }
+            if (searchDodi)
+            {
+                tasks.Add(ScraperDodi.ScrapeTorrentsAsync(searchText, UpdateDataGridView));
+            }
+            if (searchGOG)
+            {
+                tasks.Add(ScraperGOG.ScrapeTorrentsAsync(searchText, UpdateDataGridView));
+            }
+            if (searchOnlineFix)
+            {
+                tasks.Add(ScraperOnlineFix.ScrapeTorrentsAsync(searchText, UpdateDataGridView));
+            }
+            if (searchTinyRepacks)
+            {
+                tasks.Add(ScraperTinyRepacks.ScrapeTorrentsAsync(searchText, UpdateDataGridView));
+            }
+            if (searchXatab)
+            {
+                tasks.Add(ScraperXatab.ScrapeTorrentsAsync(searchText, UpdateDataGridView));
             }
 
             #endregion checkSettings

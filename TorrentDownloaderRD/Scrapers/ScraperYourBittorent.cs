@@ -20,7 +20,7 @@ namespace MediaDownloader
 
             for (int i = 1; i <= websiteSearches; i++)
             {
-                string url = $"https://yourbittorrent.com/?q={searchText.Replace(" ", "+")}&page={i}{contentItemParsed}";
+                string url = $"https://yourbittorrent.com/?q={searchText.Replace(" ", "-")}&page={i}{contentItemParsed}";
                 tasks.Add(ProcessPageAsync(url, updateCallback));
             }
 
