@@ -50,6 +50,7 @@
             this.speed_Label = new System.Windows.Forms.Label();
             this.button1 = new System.Windows.Forms.Button();
             this.progress_Label = new System.Windows.Forms.Label();
+            this.button2 = new System.Windows.Forms.Button();
             this.lstDownloadLinks = new CustomListBox();
             this.SuspendLayout();
             // 
@@ -196,7 +197,7 @@
             this.textBox6.Location = new System.Drawing.Point(12, 159);
             this.textBox6.Name = "textBox6";
             this.textBox6.ReadOnly = true;
-            this.textBox6.Size = new System.Drawing.Size(405, 23);
+            this.textBox6.Size = new System.Drawing.Size(345, 23);
             this.textBox6.TabIndex = 15;
             // 
             // button_Insert
@@ -275,11 +276,22 @@
             this.progress_Label.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.progress_Label.AutoSize = true;
             this.progress_Label.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.progress_Label.Location = new System.Drawing.Point(11, 440);
+            this.progress_Label.Location = new System.Drawing.Point(11, 441);
             this.progress_Label.Name = "progress_Label";
             this.progress_Label.Size = new System.Drawing.Size(89, 15);
             this.progress_Label.TabIndex = 24;
             this.progress_Label.Text = "Retrieved Links:";
+            // 
+            // button2
+            // 
+            this.button2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button2.Location = new System.Drawing.Point(363, 158);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(54, 26);
+            this.button2.TabIndex = 26;
+            this.button2.Text = "Open";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
             // lstDownloadLinks
             // 
@@ -288,7 +300,7 @@
             this.lstDownloadLinks.FormattingEnabled = true;
             this.lstDownloadLinks.Location = new System.Drawing.Point(12, 343);
             this.lstDownloadLinks.Name = "lstDownloadLinks";
-            this.lstDownloadLinks.Size = new System.Drawing.Size(405, 82);
+            this.lstDownloadLinks.Size = new System.Drawing.Size(405, 95);
             this.lstDownloadLinks.Sorted = true;
             this.lstDownloadLinks.TabIndex = 25;
             this.lstDownloadLinks.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.lstDownloadLinks_MouseDoubleClick);
@@ -299,6 +311,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Window;
             this.ClientSize = new System.Drawing.Size(429, 563);
+            this.Controls.Add(this.button2);
             this.Controls.Add(this.lstDownloadLinks);
             this.Controls.Add(this.progress_Label);
             this.Controls.Add(this.button1);
@@ -355,5 +368,6 @@
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Label progress_Label;
         private CustomListBox lstDownloadLinks;
+        private System.Windows.Forms.Button button2;
     }
 }

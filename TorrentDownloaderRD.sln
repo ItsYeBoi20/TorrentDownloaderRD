@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34322.80
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediaDownloader", "MediaDownloader\MediaDownloader.csproj", "{9D578821-808E-4C40-B4F2-967ECE0BBC7C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TorrentDownloaderRD", "MediaDownloader\TorrentDownloaderRD.csproj", "{9D578821-808E-4C40-B4F2-967ECE0BBC7C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

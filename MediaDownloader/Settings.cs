@@ -15,7 +15,7 @@ namespace MediaDownloader
         private static extern IntPtr LoadCursor(IntPtr hInstance, int lpCursorName);
         private const int IDC_HAND = 32649;
 
-        public static string currentVersion = "1.0.1";
+        public static string currentVersion = "1.0.2";
 
         public Settings()
         {
@@ -179,7 +179,7 @@ namespace MediaDownloader
 
         private async Task<string> GetLatestVersionAsync()
         {
-            string fileUrl = "https://raw.githubusercontent.com/ItsYeBoi20/TorrentDownloaderRD/main/MediaDownloader/Settings.cs";
+            string fileUrl = "https://raw.githubusercontent.com/ItsYeBoi20/TorrentDownloaderRD/main/TorrentDownloaderRD/Settings.cs";
             using (HttpClient client = new HttpClient())
             {
                 try

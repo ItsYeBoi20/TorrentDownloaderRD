@@ -126,13 +126,6 @@ namespace MediaDownloader
                                     }
                                 }));
                             }
-                            else
-                            {
-                                this.Invoke((Action)(() =>
-                                {
-                                    MessageBox.Show("No torrents found or an error occurred.");
-                                }));
-                            }
                         });
                     }
                 }

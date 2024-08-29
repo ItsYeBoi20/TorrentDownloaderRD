@@ -491,5 +491,34 @@ namespace MediaDownloader
 
             return string.Join("/", parts);
         }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            DialogResult dialogResult = MessageBox.Show("This will open the magnet link inside QBittorrent,\nAre you sure?", "Confirmation", MessageBoxButtons.YesNo);
+            if (dialogResult == DialogResult.Yes)
+            {
+                try
+                {
+                    Process.Start(new ProcessStartInfo
+                    {
+                        FileName = Magnet,
+                        UseShellExecute = true
+                    });
+                    Console.WriteLine("Magnet link opened successfully.");
+                }
+                catch (InvalidOperationException ex)
+                {
+                    Console.WriteLine("No application is associated with magnet links. Please install or configure a torrent client.");
+                }
+                catch (System.ComponentModel.Win32Exception ex)
+                {
+                    Console.WriteLine("An error occurred while trying to open the magnet link: " + ex.Message);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("An unexpected error occurred: " + ex.Message);
+                }
+            }
+        }
     }
 }
