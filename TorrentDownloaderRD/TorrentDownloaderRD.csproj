@@ -284,6 +284,7 @@
       <DependentUpon>SavedTorrents.cs</DependentUpon>
     </Compile>
     <Compile Include="Scrapers\Scraper1337x.cs" />
+    <Compile Include="Scrapers\ScraperAnimeTosho.cs" />
     <Compile Include="Scrapers\ScraperBitSearch.cs" />
     <Compile Include="Scrapers\ScraperDodi.cs" />
     <Compile Include="Scrapers\ScraperEmpress.cs" />

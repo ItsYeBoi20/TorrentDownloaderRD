@@ -333,6 +333,44 @@ namespace MediaDownloader
                                 throw new Exception("Magnet link node not found");
                             }
                         }
+                        else if (url.Contains("animetosho.org"))
+                        {
+                            var xToWeb = new HtmlAgilityPack.HtmlWeb();
+                            HtmlAgilityPack.HtmlDocument xToDoc = xToWeb.Load(url);
+
+                            var magnetLinkNode = xToDoc.DocumentNode.SelectSingleNode("//*[@id='content']/table[1]//a[contains(@href, 'magnet:')]");
+                            magnetLink = magnetLinkNode != null ? magnetLinkNode.GetAttributeValue("href", "") : "Magnet link not found";
+
+
+                            var splitUrl = Regex.Split(url, @"\.");
+                            int splitUrlLength = splitUrl.Length;
+                            if (splitUrl[splitUrlLength - 1].StartsWith("n"))
+                            {
+                                try
+                                {
+                                    var cacheToWeb = new HtmlAgilityPack.HtmlWeb();
+                                    HtmlAgilityPack.HtmlDocument cacheToDoc = cacheToWeb.Load("https://cache.animetosho.org/nyaasi/view/" + splitUrl[splitUrlLength - 1].Replace("n", ""));
+
+                                    var descriptionNode = cacheToDoc.DocumentNode.SelectSingleNode("//*[@id=\"entry_description\"]");
+                                    description = descriptionNode != null ? descriptionNode.InnerHtml : "Description not found";
+                                }
+                                catch
+                                {
+
+                                }
+                            }
+
+                            string pattern = @"^magnet:\?xt=urn:[a-zA-Z0-9]+:[a-zA-Z0-9]{32,40}(&.*)?$";
+                            Regex regex = new Regex(pattern);
+                            if (regex.IsMatch(magnetLink))
+                            {
+                                success = true;
+                            }
+                            else
+                            {
+                                throw new Exception("Magnet link node not found");
+                            }
+                        }
                         else if (url.Equals("FitGirl"))
                         {
                             magnetLink = magnetLinksFitGirl.ContainsKey(name) ? magnetLinksFitGirl[name] : "Magnet link not found";
@@ -467,6 +505,23 @@ namespace MediaDownloader
                 c.StartPosition = FormStartPosition.Manual;
                 int x = this.Location.X + (this.Width - c.Width) / 2;
                 int y = this.Location.Y + (this.Height - c.Height) / 2;
+                Rectangle screenBounds = Screen.FromControl(this).WorkingArea;
+                if (x < screenBounds.Left)
+                {
+                    x = screenBounds.Left;
+                }
+                else if (x + c.Width > screenBounds.Right)
+                {
+                    x = screenBounds.Right - c.Width;
+                }
+                if (y < screenBounds.Top)
+                {
+                    y = screenBounds.Top;
+                }
+                else if (y + c.Height > screenBounds.Bottom)
+                {
+                    y = screenBounds.Bottom - c.Height;
+                }
                 c.Location = new Point(x, y);
                 c.Show();
 
@@ -495,11 +550,26 @@ namespace MediaDownloader
                 settingsForm = new Settings();
                 settingsForm.StartPosition = FormStartPosition.Manual;
 
-                // Calculate the center position
                 int x = this.Location.X + (this.Width - settingsForm.Width) / 2;
                 int y = this.Location.Y + (this.Height - settingsForm.Height) / 2;
+                Rectangle screenBounds = Screen.FromControl(this).WorkingArea;
+                if (x < screenBounds.Left)
+                {
+                    x = screenBounds.Left;
+                }
+                else if (x + settingsForm.Width > screenBounds.Right)
+                {
+                    x = screenBounds.Right - settingsForm.Width;
+                }
+                if (y < screenBounds.Top)
+                {
+                    y = screenBounds.Top;
+                }
+                else if (y + settingsForm.Height > screenBounds.Bottom)
+                {
+                    y = screenBounds.Bottom - settingsForm.Height;
+                }
                 settingsForm.Location = new Point(x, y);
-
                 settingsForm.Show();
             }
             else
@@ -524,11 +594,26 @@ namespace MediaDownloader
                 saved = new SavedTorrents();
                 saved.StartPosition = FormStartPosition.Manual;
 
-                // Calculate the center position
                 int x = this.Location.X + (this.Width - saved.Width) / 2;
                 int y = this.Location.Y + (this.Height - saved.Height) / 2;
+                Rectangle screenBounds = Screen.FromControl(this).WorkingArea;
+                if (x < screenBounds.Left)
+                {
+                    x = screenBounds.Left;
+                }
+                else if (x + saved.Width > screenBounds.Right)
+                {
+                    x = screenBounds.Right - saved.Width;
+                }
+                if (y < screenBounds.Top)
+                {
+                    y = screenBounds.Top;
+                }
+                else if (y + saved.Height > screenBounds.Bottom)
+                {
+                    y = screenBounds.Bottom - saved.Height;
+                }
                 saved.Location = new Point(x, y);
-
                 saved.Show();
             }
             else
@@ -595,6 +680,7 @@ namespace MediaDownloader
             bool searchOnlineFix = false;
             bool searchTinyRepacks = false;
             bool searchXatab = false;
+            bool searchAnimeTosho = false;
 
             if (File.Exists("Settings.txt"))
             {
@@ -631,14 +717,15 @@ namespace MediaDownloader
                             case "OnlineFix": searchOnlineFix = isChecked; break;
                             case "TinyRepacks": searchTinyRepacks = isChecked; break;
                             case "Xatab": searchXatab = isChecked; break;
+                            case "AnimeTosho": searchAnimeTosho = isChecked; break;
                         }
                     }
                 }
             }
 
-            if (!search1337x && !searchLimeTorrents && !searchNyaa && !searchPiratebay && !searchTorlock2 && !searchTorrentProject && !searchTorrentsCSV && 
-                !searchTorrentDownload && !searchYourBittorrent && !searchTorrentGalaxy && !searchBitSearch && !searchTheRarbg && !searchFitGirl && 
-                !searchEmpress && !searchDodi && !searchGOG && !searchOnlineFix && !searchTinyRepacks && !searchXatab)
+            if (!search1337x && !searchLimeTorrents && !searchNyaa && !searchAnimeTosho && !searchPiratebay && !searchTorlock2 && !searchTorrentProject && 
+                !searchTorrentsCSV && !searchTorrentDownload && !searchYourBittorrent && !searchTorrentGalaxy && !searchBitSearch && !searchTheRarbg && 
+                !searchFitGirl && !searchEmpress && !searchDodi && !searchGOG && !searchOnlineFix && !searchTinyRepacks && !searchXatab)
             {
                 MessageBox.Show("No search provider selected. Please enable at least one search provider in the settings.");
             }
@@ -720,6 +807,10 @@ namespace MediaDownloader
             if (searchXatab)
             {
                 tasks.Add(ScraperXatab.ScrapeTorrentsAsync(searchText, UpdateDataGridView));
+            }
+            if (searchAnimeTosho)
+            {
+                tasks.Add(ScraperAnimeTosho.ScrapeTorrentsAsync(searchText, contentItem, sortByItem, websiteSearches, UpdateDataGridView));
             }
 
             #endregion checkSettings

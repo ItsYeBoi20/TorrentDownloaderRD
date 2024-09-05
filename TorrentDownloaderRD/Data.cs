@@ -336,7 +336,12 @@ namespace MediaDownloader
 
         private async void button1_Click(object sender, EventArgs e)
         {
-            // Check if the operation is already running
+            if (lstDownloadLinks.Items.Count == 0)
+            {
+                MessageBox.Show("No links to download.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             if (_isDownloadRunning)
             {
                 MessageBox.Show("Operation is already in progress.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -517,6 +522,37 @@ namespace MediaDownloader
                 catch (Exception ex)
                 {
                     Console.WriteLine("An unexpected error occurred: " + ex.Message);
+                }
+            }
+        }
+
+        private void lstDownloadLinks_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Back || e.KeyCode == Keys.Delete)
+            {
+                try
+                {
+                    lstDownloadLinks.BeginUpdate();
+
+                    for (int i = lstDownloadLinks.SelectedItems.Count - 1; i >= 0; i--)
+                    {
+                        lstDownloadLinks.Items.Remove(lstDownloadLinks.SelectedItems[i]);
+                    }
+
+                    if (lstDownloadLinks.Items.Count > 0)
+                    {
+                        lstDownloadLinks.TopIndex = 0;
+                    }
+
+                    e.Handled = true;
+                }
+                catch (IndexOutOfRangeException ex)
+                {
+                    //Console.WriteLine($"Error: {ex.Message}");
+                }
+                finally
+                {
+                    lstDownloadLinks.EndUpdate();
                 }
             }
         }

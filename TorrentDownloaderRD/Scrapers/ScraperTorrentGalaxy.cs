@@ -30,6 +30,11 @@ namespace MediaDownloader.Scrapers
 
                 string[] lines = content.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
 
+                if (lines == null)
+                {
+                    return;
+                }    
+
                 foreach (var line in lines)
                 {
                     if (line.ToLower().Contains(searchText.ToLower()))

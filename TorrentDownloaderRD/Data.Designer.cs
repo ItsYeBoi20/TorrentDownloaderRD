@@ -58,7 +58,7 @@
             // 
             this.button_Copy.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.button_Copy.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button_Copy.Location = new System.Drawing.Point(11, 506);
+            this.button_Copy.Location = new System.Drawing.Point(11, 519);
             this.button_Copy.Name = "button_Copy";
             this.button_Copy.Size = new System.Drawing.Size(120, 45);
             this.button_Copy.TabIndex = 0;
@@ -204,7 +204,7 @@
             // 
             this.button_Insert.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_Insert.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button_Insert.Location = new System.Drawing.Point(298, 506);
+            this.button_Insert.Location = new System.Drawing.Point(298, 519);
             this.button_Insert.Name = "button_Insert";
             this.button_Insert.Size = new System.Drawing.Size(120, 45);
             this.button_Insert.TabIndex = 16;
@@ -243,7 +243,7 @@
             // 
             this.progressBar1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.progressBar1.Location = new System.Drawing.Point(12, 477);
+            this.progressBar1.Location = new System.Drawing.Point(12, 490);
             this.progressBar1.Name = "progressBar1";
             this.progressBar1.Size = new System.Drawing.Size(405, 23);
             this.progressBar1.TabIndex = 21;
@@ -253,7 +253,7 @@
             this.speed_Label.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.speed_Label.AutoSize = true;
             this.speed_Label.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.speed_Label.Location = new System.Drawing.Point(11, 459);
+            this.speed_Label.Location = new System.Drawing.Point(11, 472);
             this.speed_Label.Name = "speed_Label";
             this.speed_Label.Size = new System.Drawing.Size(99, 15);
             this.speed_Label.TabIndex = 22;
@@ -263,7 +263,7 @@
             // 
             this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button1.Enabled = false;
-            this.button1.Location = new System.Drawing.Point(172, 506);
+            this.button1.Location = new System.Drawing.Point(172, 519);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(120, 45);
             this.button1.TabIndex = 23;
@@ -276,7 +276,7 @@
             this.progress_Label.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.progress_Label.AutoSize = true;
             this.progress_Label.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.progress_Label.Location = new System.Drawing.Point(11, 441);
+            this.progress_Label.Location = new System.Drawing.Point(11, 454);
             this.progress_Label.Name = "progress_Label";
             this.progress_Label.Size = new System.Drawing.Size(89, 15);
             this.progress_Label.TabIndex = 24;
@@ -300,9 +300,11 @@
             this.lstDownloadLinks.FormattingEnabled = true;
             this.lstDownloadLinks.Location = new System.Drawing.Point(12, 343);
             this.lstDownloadLinks.Name = "lstDownloadLinks";
-            this.lstDownloadLinks.Size = new System.Drawing.Size(405, 95);
+            this.lstDownloadLinks.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
+            this.lstDownloadLinks.Size = new System.Drawing.Size(405, 108);
             this.lstDownloadLinks.Sorted = true;
             this.lstDownloadLinks.TabIndex = 25;
+            this.lstDownloadLinks.KeyDown += new System.Windows.Forms.KeyEventHandler(this.lstDownloadLinks_KeyDown);
             this.lstDownloadLinks.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.lstDownloadLinks_MouseDoubleClick);
             // 
             // Data
@@ -310,7 +312,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Window;
-            this.ClientSize = new System.Drawing.Size(429, 563);
+            this.ClientSize = new System.Drawing.Size(429, 576);
             this.Controls.Add(this.button2);
             this.Controls.Add(this.lstDownloadLinks);
             this.Controls.Add(this.progress_Label);

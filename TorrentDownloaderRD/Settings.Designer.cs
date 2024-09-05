@@ -39,6 +39,12 @@
             this.checkBox_Remove = new System.Windows.Forms.CheckBox();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
+            this.label_All = new System.Windows.Forms.Label();
+            this.label_Anime = new System.Windows.Forms.Label();
+            this.label_None = new System.Windows.Forms.Label();
+            this.label_Games = new System.Windows.Forms.Label();
+            this.label_Movies = new System.Windows.Forms.Label();
+            this.label_Media = new System.Windows.Forms.Label();
             this.checkedListBox_Providers = new CustomCheckedListBox();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_Pages)).BeginInit();
             this.SuspendLayout();
@@ -162,6 +168,90 @@
             this.label2.Text = "Current Version: ";
             this.label2.Click += new System.EventHandler(this.label2_Click);
             // 
+            // label_All
+            // 
+            this.label_All.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.label_All.AutoSize = true;
+            this.label_All.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.label_All.Enabled = false;
+            this.label_All.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Underline, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label_All.Location = new System.Drawing.Point(385, 140);
+            this.label_All.Name = "label_All";
+            this.label_All.Size = new System.Drawing.Size(21, 15);
+            this.label_All.TabIndex = 13;
+            this.label_All.Text = "All";
+            this.label_All.Click += new System.EventHandler(this.label_All_Click);
+            // 
+            // label_Anime
+            // 
+            this.label_Anime.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.label_Anime.AutoSize = true;
+            this.label_Anime.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.label_Anime.Enabled = false;
+            this.label_Anime.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Underline, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label_Anime.Location = new System.Drawing.Point(385, 167);
+            this.label_Anime.Name = "label_Anime";
+            this.label_Anime.Size = new System.Drawing.Size(42, 15);
+            this.label_Anime.TabIndex = 14;
+            this.label_Anime.Text = "Anime";
+            this.label_Anime.Click += new System.EventHandler(this.label_Anime_Click);
+            // 
+            // label_None
+            // 
+            this.label_None.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.label_None.AutoSize = true;
+            this.label_None.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.label_None.Enabled = false;
+            this.label_None.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Underline, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label_None.Location = new System.Drawing.Point(488, 140);
+            this.label_None.Name = "label_None";
+            this.label_None.Size = new System.Drawing.Size(36, 15);
+            this.label_None.TabIndex = 15;
+            this.label_None.Text = "None";
+            this.label_None.Click += new System.EventHandler(this.label_None_Click);
+            // 
+            // label_Games
+            // 
+            this.label_Games.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.label_Games.AutoSize = true;
+            this.label_Games.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.label_Games.Enabled = false;
+            this.label_Games.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Underline, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label_Games.Location = new System.Drawing.Point(481, 167);
+            this.label_Games.Name = "label_Games";
+            this.label_Games.Size = new System.Drawing.Size(43, 15);
+            this.label_Games.TabIndex = 16;
+            this.label_Games.Text = "Games";
+            this.label_Games.Click += new System.EventHandler(this.label_Games_Click);
+            // 
+            // label_Movies
+            // 
+            this.label_Movies.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.label_Movies.AutoSize = true;
+            this.label_Movies.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.label_Movies.Enabled = false;
+            this.label_Movies.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Underline, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label_Movies.Location = new System.Drawing.Point(385, 193);
+            this.label_Movies.Name = "label_Movies";
+            this.label_Movies.Size = new System.Drawing.Size(63, 15);
+            this.label_Movies.TabIndex = 17;
+            this.label_Movies.Text = "Movies/TV";
+            this.label_Movies.Click += new System.EventHandler(this.label_Movies_Click);
+            // 
+            // label_Media
+            // 
+            this.label_Media.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.label_Media.AutoSize = true;
+            this.label_Media.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.label_Media.Enabled = false;
+            this.label_Media.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Underline, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label_Media.Location = new System.Drawing.Point(484, 193);
+            this.label_Media.Name = "label_Media";
+            this.label_Media.Size = new System.Drawing.Size(40, 15);
+            this.label_Media.TabIndex = 18;
+            this.label_Media.Text = "Media";
+            this.label_Media.Click += new System.EventHandler(this.label_Media_Click);
+            // 
             // checkedListBox_Providers
             // 
             this.checkedListBox_Providers.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -174,6 +264,7 @@
             "1337x",
             "LimeTorrents",
             "Nyaa",
+            "AnimeTosho",
             "Piratebay",
             "Torlock2",
             "TorrentProject",
@@ -201,6 +292,12 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Window;
             this.ClientSize = new System.Drawing.Size(536, 354);
+            this.Controls.Add(this.label_Media);
+            this.Controls.Add(this.label_Movies);
+            this.Controls.Add(this.label_Games);
+            this.Controls.Add(this.label_None);
+            this.Controls.Add(this.label_Anime);
+            this.Controls.Add(this.label_All);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.checkedListBox_Providers);
@@ -239,5 +336,11 @@
         private CustomCheckedListBox checkedListBox_Providers;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label label_All;
+        private System.Windows.Forms.Label label_Anime;
+        private System.Windows.Forms.Label label_None;
+        private System.Windows.Forms.Label label_Games;
+        private System.Windows.Forms.Label label_Movies;
+        private System.Windows.Forms.Label label_Media;
     }
 }
