@@ -17,7 +17,7 @@ namespace MediaDownloader
         private static extern IntPtr LoadCursor(IntPtr hInstance, int lpCursorName);
         private const int IDC_HAND = 32649;
 
-        public static string currentVersion = "1.0.3";
+        public static string currentVersion = "1.0.4";
 
         public Settings()
         {
