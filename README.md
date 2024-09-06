@@ -29,6 +29,7 @@
 - **[1337x](https://1337x.to/)**
 - **[Lime Torrents](https://www.limetorrents.lol/)**
 - **[Nyaa.si](https://nyaa.si/)**
+- **[AnimeTosho](https://animetosho.org/)**
 - **[Pirate Bay](https://thepiratebay.org/)**
 - **[TorLock](https://www.torlock2.com/)**
 - **[Torrent Project](https://torrentproject.cc/)**
@@ -39,6 +40,12 @@
 - **[BitSearch](https://bitsearch.to/)**
 - **[TheRarbg](https://therarbg.com/)**
 - **[FitGirl](https://fitgirl-repacks.site/)**
+- **[Dodi](https://dodi-repacks.site/)**
+- **[Empress](https://telegra.ph/empress-biography-07-15)**
+- **[GOG](https://gog-games.to/)**
+- **[TinyRepacks](https://tiny-repacks.win/)**
+- **[OnlineFix](https://online-fix.me/)**
+- **[Xatab](https://byxatab.com/)**
 
 ### Known Issues
 - **Nyaa.si**: Repeated attempts to open a specific file may result in temporary server blocks. Wait a few seconds and try again. This occurs only when trying to open the same file multiple times in quick succession.
