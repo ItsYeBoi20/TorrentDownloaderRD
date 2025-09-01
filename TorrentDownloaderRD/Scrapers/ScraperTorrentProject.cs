@@ -1,40 +1,64 @@
 ﻿using HtmlAgilityPack;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net.Http;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace MediaDownloader.Scrapers
 {
     internal class ScraperTorrentProject
     {
-        public static async Task ScrapeTorrentsAsync(string searchText, int websiteSearches, Action<TorrentInfo> updateCallback)
+        public static async Task ScrapeTorrentsAsync(string searchText, int websiteSearches, Action<TorrentInfo> updateCallback, int timeoutDelay, CancellationToken cancellationToken)
         {
             var tasks = new List<Task>();
 
             for (int i = 0; i < websiteSearches; i++)
             {
                 string url = $"https://torrentproject.cc/?t={searchText.Replace(" ", "+")}&p={i}";
-                tasks.Add(ProcessPageAsync(url, updateCallback));
+                tasks.Add(ProcessPageAsync(url, updateCallback, timeoutDelay, cancellationToken));
             }
 
             await Task.WhenAll(tasks);
         }
 
-        private static async Task ProcessPageAsync(string url, Action<TorrentInfo> updateCallback)
+        private static async Task ProcessPageAsync(string url, Action<TorrentInfo> updateCallback, int timeoutDelay, CancellationToken cancellationToken)
         {
-            var htmlDoc = await new HtmlWeb().LoadFromWebAsync(url);
+            var htmlDoc = await LoadFromWebWithTimeoutAsync(url, TimeSpan.FromSeconds(timeoutDelay), cancellationToken);
             var rows = htmlDoc.DocumentNode.SelectNodes("//*[@id=\"similarfiles\"]/div");
 
             if (rows == null) return;
 
             foreach (var row in rows)
             {
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return;
+                }
+
                 var torrent = ExtractTorrentInfoFromRow(row);
                 if (torrent != null)
                 {
                     updateCallback?.Invoke(torrent);
+                }
+            }
+        }
+
+        private static async Task<HtmlDocument> LoadFromWebWithTimeoutAsync(string url, TimeSpan timeout, CancellationToken cancellationToken)  //ADDDDDDDDEEEEEDDD
+        {
+            using (var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken))
+            {
+                cts.CancelAfter(timeout);
+                try
+                {
+                    var htmlWeb = new HtmlWeb();
+                    return await htmlWeb.LoadFromWebAsync(url, cts.Token);
+                }
+                catch (OperationCanceledException)
+                {
+                    return null;
                 }
             }
         }
@@ -87,7 +111,7 @@ namespace MediaDownloader.Scrapers
         public static long ConvertToBytes(string sizeText)
         {
             sizeText = sizeText.ToUpper().Replace(",", "").Trim();
-            double size = double.Parse(System.Text.RegularExpressions.Regex.Match(sizeText, @"\d+(\.\d+)?").Value);
+            double size = double.Parse(System.Text.RegularExpressions.Regex.Match(sizeText, @"\d+(\.\d+)?").Value, CultureInfo.InvariantCulture);
 
             if (sizeText.Contains("TB"))
                 size *= Math.Pow(1024, 4);

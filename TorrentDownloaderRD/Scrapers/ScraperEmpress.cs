@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Net;
 using System.Net.Http;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 
@@ -11,19 +14,52 @@ namespace MediaDownloader.Scrapers
     {
         private const string SearchUrl = "https://hydralinks.cloud/sources/empress.json";
 
-        public static async Task ScrapeTorrentsAsync(string searchText, Action<TorrentInfo> updateCallback)
+        private static readonly HttpClient client = new HttpClient(new HttpClientHandler
+        {
+            MaxConnectionsPerServer = 10,
+            AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
+        })
+        {
+            Timeout = TimeSpan.FromSeconds(15)
+        };
+
+        public static async Task ScrapeTorrentsAsync(string searchText, Action<TorrentInfo> updateCallback, int timeoutDelay, CancellationToken cancellationToken)
         {
             try
             {
-                using (HttpClient client = new HttpClient())
+                // Set a request-specific timeout using the cancellation token
+                using (var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken))
                 {
-                    var response = await client.GetStringAsync(SearchUrl);
-                    var responseJson = JObject.Parse(response);
+                    cts.CancelAfter(TimeSpan.FromSeconds(timeoutDelay));
+                    cancellationToken = cts.Token;
+
+                    // Make the request
+                    var response = await client.GetAsync(SearchUrl, cancellationToken);
+
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        return;
+                    }
+
+                    // Read the response content
+                    var responseContent = await response.Content.ReadAsStringAsync();
+
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        return;
+                    }
+
+                    var responseJson = JObject.Parse(responseContent);
                     searchText = Uri.UnescapeDataString(searchText).ToLower();
                     var searchTerms = searchText.Split(' ');
 
                     foreach (var result in responseJson["downloads"])
                     {
+                        if (cancellationToken.IsCancellationRequested)
+                        {
+                            return;
+                        }
+
                         string title = result["title"].ToString().ToLower();
 
                         if (MatchesSearchTerms(title, searchTerms))
@@ -50,6 +86,11 @@ namespace MediaDownloader.Scrapers
                     }
                 }
             }
+            catch (TaskCanceledException)
+            {
+                // Handle task cancellation due to timeout or cancellation token
+                // Console.WriteLine("Task was canceled.");
+            }
             catch (Exception ex)
             {
                 // Console.WriteLine($"Error scraping Empress Repacks: {ex.Message}");
@@ -73,7 +114,7 @@ namespace MediaDownloader.Scrapers
             try
             {
                 sizeText = sizeText.ToUpper().Replace(",", "").Trim();
-                double size = double.Parse(Regex.Match(sizeText, @"\d+(\.\d+)?").Value);
+                double size = double.Parse(Regex.Match(sizeText, @"\d+(\.\d+)?").Value, CultureInfo.InvariantCulture);
 
                 if (sizeText.Contains("TB"))
                     size *= Math.Pow(1024, 4);

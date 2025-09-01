@@ -1,12 +1,15 @@
 ﻿using RealDebridAPI;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using TorrentDownloaderRD;
+using TorrentDownloaderRD.Processing;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace MediaDownloader
@@ -17,7 +20,8 @@ namespace MediaDownloader
         private static extern IntPtr LoadCursor(IntPtr hInstance, int lpCursorName);
         private const int IDC_HAND = 32649;
 
-        public static string currentVersion = "1.0.4";
+        public static string currentVersion = "1.1.1";
+        public static string selectedProvider = "Real-Debrid";
 
         public Settings()
         {
@@ -30,49 +34,20 @@ namespace MediaDownloader
             label_Games.Cursor = new Cursor(LoadCursor(IntPtr.Zero, IDC_HAND));
             label_Movies.Cursor = new Cursor(LoadCursor(IntPtr.Zero, IDC_HAND));
             label_Media.Cursor = new Cursor(LoadCursor(IntPtr.Zero, IDC_HAND));
-        }
-
-        private void button_Edit_Click(object sender, EventArgs e)
-        {
-            if (textBox_Key.Enabled == true)
-            {
-                textBox_Key.Enabled = false;
-                numericUpDown_Pages.Enabled = false;
-                checkedListBox_Providers.Enabled = false;
-                checkBox_Remove.Enabled = false;
-                button_Edit.Text = "Edit";
-
-                label_None.Enabled = false;
-                label_All.Enabled = false;
-                label_Anime.Enabled = false;
-                label_Games.Enabled = false;
-                label_Movies.Enabled = false;
-                label_Media.Enabled = false;
-            }
-            else if (textBox_Key.Enabled == false)
-            {
-                textBox_Key.Enabled = true;
-                numericUpDown_Pages.Enabled = true;
-                checkedListBox_Providers.Enabled = true;
-                checkBox_Remove.Enabled = true;
-                button_Edit.Text = "Done";
-
-                label_None.Enabled = true;
-                label_All.Enabled = true;
-                label_Anime.Enabled = true;
-                label_Games.Enabled = true;
-                label_Movies.Enabled = true;
-                label_Media.Enabled = true;
-            }
+            label3.Cursor = new Cursor(LoadCursor(IntPtr.Zero, IDC_HAND));
+            label4.Cursor = new Cursor(LoadCursor(IntPtr.Zero, IDC_HAND));
         }
 
         private void button_Save_Click(object sender, EventArgs e)
         {
             // Write the initial settings to the file
-            File.WriteAllText("Settings.txt", 
-                "API Key: " + textBox_Key.Text + "\n" + 
+            File.WriteAllText("Settings.txt",
+                "API Provider: " + selectedProvider + "\n" +
+                "Real-Debrid API Key: " + textBox_Key.Text + "\n" +
+                "AllDebrid API Key: " + textBox_Key1.Text + "\n" +
                 "Website Searches: " + numericUpDown_Pages.Value + "\n" + 
-                "DeleteAfter: " + checkBox_Remove.Checked + "\n");
+                "DeleteAfter: " + checkBox_Remove.Checked + "\n" +
+                "DetailedView: " + checkBox_Detailed.Checked + "\n");
 
             // Append each item in the CheckedListBox to the file
             using (StreamWriter writer = new StreamWriter("Settings.txt", true))
@@ -88,18 +63,9 @@ namespace MediaDownloader
             if (textBox_Key.Enabled == true)
             {
                 checkedListBox_Providers.Enabled = false;
-                textBox_Key.Enabled = false;
-                numericUpDown_Pages.Enabled = false;
-                checkBox_Remove.Enabled = false;
-                button_Edit.Text = "Edit";
-
-                label_None.Enabled = false;
-                label_All.Enabled = false;
-                label_Anime.Enabled = false;
-                label_Games.Enabled = false;
-                label_Movies.Enabled = false;
-                label_Media.Enabled = false;
             }
+
+            button_Save.Text = "Saved Settings!";
         }
 
         private void Settings_Load(object sender, EventArgs e)
@@ -109,12 +75,38 @@ namespace MediaDownloader
             if (File.Exists("Settings.txt"))
             {
                 string[] lines = File.ReadAllLines("Settings.txt");
-                textBox_Key.Text = lines[0].Replace("API Key: ", "");
-                numericUpDown_Pages.Value = Convert.ToDecimal(lines[1].Replace("Website Searches: ", ""));
-                checkBox_Remove.Checked = Convert.ToBoolean(lines[2].Replace("DeleteAfter: ", ""));
+                string selectedAPI = lines[0].Replace("API Provider: ", "");
+                textBox_Key.Text = lines[1].Replace("Real-Debrid API Key: ", "");
+                textBox_Key1.Text = lines[2].Replace("AllDebrid API Key: ", "");
+                numericUpDown_Pages.Value = Convert.ToDecimal(lines[3].Replace("Website Searches: ", ""));
+                checkBox_Remove.Checked = Convert.ToBoolean(lines[4].Replace("DeleteAfter: ", ""));
+                checkBox_Detailed.Checked = Convert.ToBoolean(lines[5].Replace("DetailedView: ", ""));
 
-                // Start reading from the third line for CheckedListBox items
-                for (int i = 3; i < lines.Length; i++)
+                if (selectedAPI == "Real-Debrid")
+                {
+                    selectedProvider = "Real-Debrid";
+                    label3.ForeColor = Color.DarkGreen;
+                    label4.ForeColor = Color.Black;
+                    textBox_Key.Enabled = true;
+                    textBox_Key.Visible = true;
+
+                    textBox_Key1.Enabled = false;
+                    textBox_Key1.Visible = false;
+                }
+                else if (selectedAPI == "AllDebrid")
+                {
+                    selectedProvider = "AllDebrid";
+                    label3.ForeColor = Color.Black;
+                    label4.ForeColor = Color.DarkGreen;
+                    textBox_Key.Enabled = false;
+                    textBox_Key.Visible = false;
+
+                    textBox_Key1.Enabled = true;
+                    textBox_Key1.Visible = true;
+                }
+
+                // Start reading from the fifth line for CheckedListBox items
+                for (int i = 5; i < lines.Length; i++)
                 {
                     string[] parts = lines[i].Split(':');
                     if (parts.Length == 2)
@@ -137,18 +129,35 @@ namespace MediaDownloader
         {
             if (textBox_Key.Text != "")
             {
-                string APIKey = textBox_Key.Text;
-                var client = new RealDebridClient(APIKey);
-
-                bool isPremium = await client.IsPremiumUserAsync();
-
-                if (isPremium)
+                if (selectedProvider == "Real-Debrid")
                 {
-                    MessageBox.Show("User is a Premium member", "Premium Status", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    var client = new RealDebridClient(textBox_Key.Text);
+
+                    bool isPremium = await client.IsPremiumUserAsync();
+
+                    if (isPremium)
+                    {
+                        MessageBox.Show("User is a Premium member", "Premium Status", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    else
+                    {
+                        MessageBox.Show("User is not a Premium member", "Premium Status", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
                 }
-                else
+                else if (selectedProvider == "AllDebrid")
                 {
-                    MessageBox.Show("User is not a Premium member", "Premium Status", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    var client = new AllDebridClient(textBox_Key1.Text);
+
+                    bool isPremium = await client.IsPremiumUserAsync();
+
+                    if (isPremium)
+                    {
+                        MessageBox.Show("User is a Premium member", "Premium Status", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    else
+                    {
+                        MessageBox.Show("User is not a Premium member", "Premium Status", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
                 }
             }
             else
@@ -204,7 +213,6 @@ namespace MediaDownloader
             }
             return false; // Versions are equal
         }
-
 
         private async Task<string> GetLatestVersionAsync()
         {
@@ -262,7 +270,7 @@ namespace MediaDownloader
         private void label_Movies_Click(object sender, EventArgs e)
         {
             List<string> itemsToCheck = new List<string> { "1337x", "LimeTorrents", "Piratebay", "Torlock2", "TorrentProject", 
-                "Torrents-CSV", "TorrentDownload", "YourBittorrent", "TorrentGalaxy", "BitSearch", "TheRarbg" };
+                "Torrents-CSV", "TorrentDownload", "YourBittorrent", "TorrentGalaxy", "BitSearch", "TheRarbg", "KickAssTorrents" };
 
             CheckNoItems();
 
@@ -272,7 +280,7 @@ namespace MediaDownloader
         private void label_Media_Click(object sender, EventArgs e)
         {
             List<string> itemsToCheck = new List<string> { "1337x", "LimeTorrents", "Nyaa", "AnimeTosho" , "Piratebay", "Torlock2", "TorrentProject",
-                "Torrents-CSV", "TorrentDownload", "YourBittorrent", "TorrentGalaxy", "BitSearch", "TheRarbg" };
+                "Torrents-CSV", "TorrentDownload", "YourBittorrent", "TorrentGalaxy", "BitSearch", "TheRarbg", "KickAssTorrents" };
 
             CheckNoItems();
 
@@ -304,6 +312,94 @@ namespace MediaDownloader
                 {
                     checkedListBox.SetItemChecked(i, true);
                 }
+            }
+        }
+
+        private void Settings_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            // Write the initial settings to the file
+            File.WriteAllText("Settings.txt",
+                "API Provider: " + selectedProvider + "\n" +
+                "Real-Debrid API Key: " + textBox_Key.Text + "\n" +
+                "AllDebrid API Key: " + textBox_Key1.Text + "\n" +
+                "Website Searches: " + numericUpDown_Pages.Value + "\n" + 
+                "DeleteAfter: " + checkBox_Remove.Checked + "\n" +
+                "DetailedView: " + checkBox_Detailed.Checked + "\n");
+
+            // Append each item in the CheckedListBox to the file
+            using (StreamWriter writer = new StreamWriter("Settings.txt", true))
+            {
+                foreach (var item in checkedListBox_Providers.Items)
+                {
+                    bool isChecked = checkedListBox_Providers.GetItemChecked(checkedListBox_Providers.Items.IndexOf(item));
+                    writer.WriteLine($"{item}: {isChecked}");
+                }
+            }
+        }
+
+        private static TestProviders testForm;
+        private void button_Test_Click(object sender, EventArgs e)
+        {
+            if (testForm == null || testForm.IsDisposed)
+            {
+                testForm = new TestProviders();
+                testForm.StartPosition = FormStartPosition.Manual;
+
+                int x = this.Location.X + (this.Width - testForm.Width) / 2;
+                int y = this.Location.Y + (this.Height - testForm.Height) / 2;
+                Rectangle screenBounds = Screen.FromControl(this).WorkingArea;
+                if (x < screenBounds.Left)
+                {
+                    x = screenBounds.Left;
+                }
+                else if (x + testForm.Width > screenBounds.Right)
+                {
+                    x = screenBounds.Right - testForm.Width;
+                }
+                if (y < screenBounds.Top)
+                {
+                    y = screenBounds.Top;
+                }
+                else if (y + testForm.Height > screenBounds.Bottom)
+                {
+                    y = screenBounds.Bottom - testForm.Height;
+                }
+                testForm.Location = new Point(x, y);
+                testForm.Show();
+            }
+            else
+            {
+                testForm.BringToFront();
+            }
+        }
+
+        private void label3_Click(object sender, EventArgs e)
+        {
+            if (selectedProvider == "AllDebrid")
+            {
+                selectedProvider = "Real-Debrid";
+                label3.ForeColor = Color.DarkGreen;
+                label4.ForeColor = Color.Black;
+                textBox_Key.Enabled = true;
+                textBox_Key.Visible = true;
+
+                textBox_Key1.Enabled = false;
+                textBox_Key1.Visible = false;
+            }
+        }
+
+        private void label4_Click(object sender, EventArgs e)
+        {
+            if (selectedProvider == "Real-Debrid")
+            {
+                selectedProvider = "AllDebrid";
+                label3.ForeColor = Color.Black;
+                label4.ForeColor = Color.DarkGreen;
+                textBox_Key.Enabled = false;
+                textBox_Key.Visible = false;
+
+                textBox_Key1.Enabled = true;
+                textBox_Key1.Visible = true;
             }
         }
     }

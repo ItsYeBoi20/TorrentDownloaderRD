@@ -1,13 +1,16 @@
 ﻿using HtmlAgilityPack;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace MediaDownloader
 {
     internal class ScraperYourBittorent
     {
-        public static async Task ScrapeTorrentsAsync(string searchText, string contentItem, string sortByItem, int websiteSearches, Action<TorrentInfo> updateCallback)
+        public static async Task ScrapeTorrentsAsync(string searchText, string contentItem, string sortByItem, int websiteSearches,
+           Action<TorrentInfo> updateCallback, int timeoutDelay, CancellationToken cancellationToken)
         {
             string contentItemParsed = "";
             if (contentItem == "Movies") { contentItemParsed = "&c=1"; }
@@ -21,15 +24,23 @@ namespace MediaDownloader
             for (int i = 1; i <= websiteSearches; i++)
             {
                 string url = $"https://yourbittorrent.com/?q={searchText.Replace(" ", "-")}&page={i}{contentItemParsed}";
-                tasks.Add(ProcessPageAsync(url, updateCallback));
+                tasks.Add(ProcessPageAsync(url, updateCallback, timeoutDelay, cancellationToken));
             }
 
             await Task.WhenAll(tasks);
         }
 
-        private static async Task ProcessPageAsync(string url, Action<TorrentInfo> updateCallback)
+        private static async Task ProcessPageAsync(string url, Action<TorrentInfo> updateCallback, int timeoutDelay, CancellationToken cancellationToken)
         {
-            var htmlDoc = await new HtmlWeb().LoadFromWebAsync(url);
+            var htmlDoc = await LoadFromWebWithTimeoutAsync(url, TimeSpan.FromSeconds(timeoutDelay), cancellationToken);
+
+            // Check if htmlDoc is null (request failed)
+            if (htmlDoc == null)
+            {
+                // Handle error (log, throw exception, or return)
+                Console.WriteLine($"Failed to load page: {url}");
+                return;
+            }
 
             var rows = htmlDoc.DocumentNode.SelectNodes("/html/body/div/div[2]/table/tbody/tr");
 
@@ -37,8 +48,30 @@ namespace MediaDownloader
 
             foreach (var row in rows)
             {
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return;
+                }
+
                 var torrent = ExtractTorrentInfoFromRow(row);
                 updateCallback?.Invoke(torrent);
+            }
+        }
+
+        private static async Task<HtmlDocument> LoadFromWebWithTimeoutAsync(string url, TimeSpan timeout, CancellationToken cancellationToken)  //ADDDDDDDDEEEEEDDD
+        {
+            using (var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken))
+            {
+                cts.CancelAfter(timeout);
+                try
+                {
+                    var htmlWeb = new HtmlWeb();
+                    return await htmlWeb.LoadFromWebAsync(url, cts.Token);
+                }
+                catch (OperationCanceledException)
+                {
+                    return null;
+                }
             }
         }
 
@@ -80,7 +113,7 @@ namespace MediaDownloader
         public static long ConvertToBytes(string sizeText)
         {
             sizeText = sizeText.ToUpper().Replace(",", "").Trim();
-            double size = double.Parse(System.Text.RegularExpressions.Regex.Match(sizeText, @"\d+(\.\d+)?").Value);
+            double size = double.Parse(System.Text.RegularExpressions.Regex.Match(sizeText, @"\d+(\.\d+)?").Value, CultureInfo.InvariantCulture);
 
             if (sizeText.Contains("TB"))
                 size *= Math.Pow(1024, 4);

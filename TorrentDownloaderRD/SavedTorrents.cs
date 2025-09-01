@@ -12,15 +12,18 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using static RealDebridAPI.RealDebridClient;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using TorrentDownloaderRD.Processing;
+using static TorrentDownloaderRD.Processing.AllDebridClient;
 
 namespace MediaDownloader
 {
     public partial class SavedTorrents : Form
     {
         private RealDebridClient _realDebridClient;
+        private AllDebridClient _allDebridClient;
         private bool _isDownloadRunning = false;
+        private bool _cancellationToken = false;
+        private List<string> listIDs = new List<string>();
 
         public SavedTorrents()
         {
@@ -35,20 +38,20 @@ namespace MediaDownloader
         private async void customListBox1_MouseDoubleClick(object sender, MouseEventArgs e)
         {
             // Gets all the Download Links from the selected Torrent ID
-
             lstDownloadLinks.Items.Clear();
             string torrentStatus = "";
 
             try
             {
                 string selectedItem = customListBox1.SelectedItem.ToString();
-                var match = Regex.Split(selectedItem, ", ID: ");
+                string match = listIDs[customListBox1.SelectedIndex];
+                //var match = Regex.Split(selectedItem, ", ID: ");
 
-                RealDebridClient.TorrentInfo torrentInfo = await _realDebridClient.GetTorrentInfoAsync(match[1]);
+                RealDebridClient.TorrentInfo torrentInfo = await _realDebridClient.GetTorrentInfoAsync(match); //match[1]
                 torrentStatus = torrentInfo.Status;
 
                 Dictionary<string, string> backupDownloadLinks = null;
-                backupDownloadLinks = await _realDebridClient.GetDownloadLinksFromIDAsync(match[1]);
+                backupDownloadLinks = await _realDebridClient.GetDownloadLinksFromIDAsync(match); //match[1]
 
                 var usedLinks = new HashSet<string>();
 
@@ -81,7 +84,7 @@ namespace MediaDownloader
                         DialogResult result = MessageBox.Show($"Torrent Status is Currently: {torrentStatus},\nDelete from Real-Debrid? ", "Confirmation", MessageBoxButtons.YesNo);
                         if (result == DialogResult.Yes)
                         {
-                            await _realDebridClient.DeleteTorrentAsync(match[1]);
+                            await _realDebridClient.DeleteTorrentAsync(match); //match[1]
                             customListBox1.Items.Clear();
                             getFiles();
                         }
@@ -103,35 +106,76 @@ namespace MediaDownloader
             // Reads Settings.txt for the API Key
             // Gets all the Torrent IDs stored in Real Debrid
 
+            listIDs.Clear();
             if (File.Exists("Settings.txt"))
             {
                 try
                 {
                     string[] lines = File.ReadAllLines("Settings.txt");
-                    string GetAPIKey = lines[0].Replace("API Key: ", "");
+                    string GetAPIProvider = lines[0].Replace("API Provider: ", "");
+                    string APIKey = "";
 
-                    if (GetAPIKey == "")
+                    if (GetAPIProvider == "Real-Debrid")
                     {
-                        MessageBox.Show("Real-Debrid API Key Not Found\nViewing Your Torrents won't be Possible");
-                    }
-                    else
-                    {
-                        _realDebridClient = new RealDebridClient(GetAPIKey);
+                        APIKey = lines[1].Replace("Real-Debrid API Key: ", "");
 
-                        Task.Run(async () =>
+                        if (APIKey == "")
                         {
-                            var torrents = await _realDebridClient.GetAllTorrentIdAsync();
-                            if (torrents != null)
+                            MessageBox.Show("Real-Debrid API Key Not Found\nViewing Your Torrents won't be Possible");
+                        }
+                        else
+                        {
+                            _realDebridClient = new RealDebridClient(APIKey);
+
+                            Task.Run(async () =>
                             {
-                                this.Invoke((Action)(() =>
+                                var torrents = await _realDebridClient.GetAllTorrentIdAsync();
+                                if (torrents != null)
                                 {
-                                    foreach (var torrent in torrents)
+                                    this.Invoke((Action)(() =>
                                     {
-                                        customListBox1.Items.Add($"{torrent.Filename}, ID: {torrent.Id}");
-                                    }
-                                }));
-                            }
-                        });
+                                        foreach (var torrent in torrents)
+                                        {
+                                            listIDs.Add(torrent.Id);
+                                            customListBox1.Items.Add($"{torrent.Filename}");
+                                            //customListBox1.Items.Add($"{torrent.Filename}, ID: {torrent.Id}");
+                                        }
+                                    }));
+                                }
+                            });
+                        }
+                    }
+                    else if (GetAPIProvider == "AllDebrid")
+                    {
+                        APIKey = lines[2].Replace("AllDebrid API Key: ", "");
+
+                        if (APIKey == "")
+                        {
+                            MessageBox.Show("Real-Debrid API Key Not Found\nViewing Your Torrents won't be Possible");
+                        }
+                        else
+                        {
+                            _allDebridClient = new AllDebridClient(APIKey);
+
+                            Task.Run(async () =>
+                            {
+                                var torrents = await _allDebridClient.GetAllTorrentsAsync();
+
+                                if (torrents != null)
+                                {
+                                    var readyTorrents = torrents.Where(t => t.StatusCode == 4).ToList();
+
+                                    this.Invoke((Action)(() =>
+                                    {
+                                        foreach (var torrent in readyTorrents)
+                                        {
+                                            listIDs.Add(torrent.Id.ToString());
+                                            customListBox1.Items.Add($"{torrent.Filename}");
+                                        }
+                                    }));
+                                }
+                            });
+                        }
                     }
                 }
                 catch
@@ -160,7 +204,7 @@ namespace MediaDownloader
 
         private void lstDownloadLinks_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.KeyCode == Keys.Back || e.KeyCode == Keys.Delete)
+            if (!_isDownloadRunning && (e.KeyCode == Keys.Back || e.KeyCode == Keys.Delete))
             {
                 try
                 {
@@ -189,23 +233,58 @@ namespace MediaDownloader
             }
         }
 
+        private async void customListBox1_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Back || e.KeyCode == Keys.Delete)
+            {
+                DialogResult result = MessageBox.Show($"Delete from Real-Debrid? ", "Are You Sure?", MessageBoxButtons.YesNo);
+                if (result == DialogResult.Yes)
+                {
+                    await _realDebridClient.DeleteTorrentAsync(listIDs[customListBox1.SelectedIndex]); //match[1]
+                    customListBox1.Items.Clear();
+                    getFiles();
+                }
+            }
+        }
+
         #endregion Controls
 
         #region Download
 
         private async void button_Download_Click(object sender, EventArgs e)
         {
+            if (lstDownloadLinks.Items.Count == 0)
+            {
+                MessageBox.Show("No links to download.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             // Check if the operation is already running
             if (_isDownloadRunning)
             {
-                MessageBox.Show("Operation is already in progress.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                DialogResult result = MessageBox.Show("Operation already in progress, \nDo you want to stop the process?", "Stop Process", MessageBoxButtons.YesNo);
+                if (result == DialogResult.Yes)
+                {
+                    _cancellationToken = true;
+                }
+
                 return;
             }
             else
             {
-                this.Size = new Size(727, 653);
+                customListBox1.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+                lstDownloadLinks.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+                progress_Label.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+                speed_Label.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+                button_Download.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+                progressBar1.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+
+                this.Size = new Size(this.Width, this.Height + 31);
                 speed_Label.Visible = true;
+                progress_Label.Visible = true;
                 progressBar1.Visible = true;
+
+                button_Download.Text = "Cancel Download";
             }
             _isDownloadRunning = true;
 
@@ -223,6 +302,8 @@ namespace MediaDownloader
                 }
             }
 
+            button_Download.Text = "Download";
+            _cancellationToken = false;
             _isDownloadRunning = false;
         }
 
@@ -245,6 +326,13 @@ namespace MediaDownloader
 
                 foreach (string item in links)
                 {
+                    if (_cancellationToken)
+                    {
+                        progress_Label.Text = $"Downloaded: {downloadedFiles}/{totalFiles} Files";
+                        speed_Label.Text = "Download Speed: Completed";
+                        break;
+                    }
+
                     var splitLinks = Regex.Split(item.ToString(), ": http");
                     string downloadUrl = "http" + splitLinks[1];
 

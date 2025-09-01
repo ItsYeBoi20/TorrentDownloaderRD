@@ -180,45 +180,34 @@ namespace RealDebridAPI
                 {
                     if (file.Selected)
                     {
-                        //Console.WriteLine($"Warning: File {file.Path} has an empty or null link. Trying alternative method.");
-
-                        // Fetch the latest torrent ID and download links with file names
                         if (latestTorrentId != null)
                         {
                             if (backupDownloadLinks != null)
                             {
                                 foreach (var kvp in backupDownloadLinks)
                                 {
-                                    ///Console.WriteLine($"File: {kvp.Key}, Download Link: {kvp.Value}");
-
-                                    // Use the same logic for adding the backup link to the downloadLinks list
-                                    if (!string.IsNullOrWhiteSpace(kvp.Value) && !usedLinks.Contains(kvp.Value))
+                                    // Match the file path or file name from the backup links to the torrent file
+                                    if (file.Path.Equals(kvp.Key, StringComparison.OrdinalIgnoreCase) &&
+                                        !string.IsNullOrWhiteSpace(kvp.Value) &&
+                                        !usedLinks.Contains(kvp.Value))
                                     {
+                                        // Add the download link with the correct file size
                                         downloadLinks.Add(new DownloadLinkInfo
                                         {
-                                            FileId = null,  // Assuming the file ID isn't available here, but you can adjust this if needed
-                                            FileName = kvp.Key,
-                                            DownloadLink = kvp.Value
+                                            FileId = file.Id, // Add FileId if it's available in file object
+                                            FileName = kvp.Key,  // The file name (or path) from the download link
+                                            DownloadLink = kvp.Value,  // The actual download link
+                                            FileSize = file.Bytes // The correct file size for this file
                                         });
+
                                         usedLinks.Add(kvp.Value); // Mark this link as used
-                                    }
-                                    else
-                                    {
-                                        ///Console.WriteLine($"Duplicate or invalid backup link found for file {kvp.Key}. Skipping.");
                                     }
                                 }
                             }
-                            else
-                            {
-                                //Console.WriteLine("No download links found.");
-                            }
-                        }
-                        else
-                        {
-                            //Console.WriteLine("No torrent ID found.");
                         }
                     }
                 }
+
 
                 // Return the download links, even if some were missed (you may decide to change this behavior)
                 return downloadLinks;
@@ -434,7 +423,7 @@ namespace RealDebridAPI
         /// </summary>
         /// <param name="link">The link to unrestrict.</param>
         /// <returns>A direct download link.</returns>
-        public async Task<string> GetFileName(string link)
+        public async Task<(string fileName, long fileSize)> GetFileName(string link)
         {
             if (string.IsNullOrWhiteSpace(link))
                 throw new ArgumentException("Link cannot be null or empty.", nameof(link));
@@ -446,20 +435,19 @@ namespace RealDebridAPI
 
             var response = await _httpClient.PostAsync("unrestrict/link", content);
 
-            // Log detailed information in case of failure
             if (!response.IsSuccessStatusCode)
             {
                 var errorContent = await response.Content.ReadAsStringAsync();
                 MessageBox.Show($"Error during unrestricting link: {response.StatusCode} - {errorContent}");
-                //Console.WriteLine($"Error during unrestricting link: {response.StatusCode} - {errorContent}");
                 throw new Exception($"Failed to unrestrict link. Status Code: {response.StatusCode}, Response: {errorContent}");
             }
 
             var jsonString = await response.Content.ReadAsStringAsync();
             var result = JsonConvert.DeserializeObject<UnrestrictLinkResponse>(jsonString);
 
-            return result.FileName;
+            return (result.FileName, result.FileSize); // Return both file name and size
         }
+
 
         public void Dispose()
         {
@@ -601,6 +589,7 @@ namespace RealDebridAPI
             public string FileId { get; set; }
             public string FileName { get; set; }
             public string DownloadLink { get; set; }
+            public long FileSize { get; set; } // In bytes
         }
 
         public class User

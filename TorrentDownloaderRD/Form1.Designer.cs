@@ -51,6 +51,12 @@
             this.backgroundWorker_Search = new System.ComponentModel.BackgroundWorker();
             this.timer_Title = new System.Windows.Forms.Timer(this.components);
             this.label_Saved = new System.Windows.Forms.Label();
+            this.button_Download = new System.Windows.Forms.Button();
+            this.progressBar1 = new System.Windows.Forms.ProgressBar();
+            this.progress_Label = new System.Windows.Forms.Label();
+            this.speed_Label = new System.Windows.Forms.Label();
+            this.label_Close = new System.Windows.Forms.Label();
+            this.lstDownloadLinks = new CustomListBox();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_Seeders)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView_Torrents)).BeginInit();
             this.SuspendLayout();
@@ -297,10 +303,82 @@
             this.label_Saved.ForeColor = System.Drawing.SystemColors.ControlText;
             this.label_Saved.Location = new System.Drawing.Point(929, 11);
             this.label_Saved.Name = "label_Saved";
-            this.label_Saved.Size = new System.Drawing.Size(111, 15);
+            this.label_Saved.Size = new System.Drawing.Size(112, 15);
             this.label_Saved.TabIndex = 15;
             this.label_Saved.Text = "View Saved Torrents";
             this.label_Saved.Click += new System.EventHandler(this.label_Saved_Click);
+            // 
+            // button_Download
+            // 
+            this.button_Download.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_Download.Location = new System.Drawing.Point(1259, 381);
+            this.button_Download.Name = "button_Download";
+            this.button_Download.Size = new System.Drawing.Size(89, 38);
+            this.button_Download.TabIndex = 17;
+            this.button_Download.Text = "Download";
+            this.button_Download.UseVisualStyleBackColor = true;
+            this.button_Download.Click += new System.EventHandler(this.button_Download_Click);
+            // 
+            // progressBar1
+            // 
+            this.progressBar1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.progressBar1.Location = new System.Drawing.Point(1046, 425);
+            this.progressBar1.Name = "progressBar1";
+            this.progressBar1.Size = new System.Drawing.Size(301, 28);
+            this.progressBar1.TabIndex = 20;
+            this.progressBar1.Visible = false;
+            // 
+            // progress_Label
+            // 
+            this.progress_Label.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.progress_Label.AutoSize = true;
+            this.progress_Label.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.progress_Label.Location = new System.Drawing.Point(1045, 385);
+            this.progress_Label.Name = "progress_Label";
+            this.progress_Label.Size = new System.Drawing.Size(92, 15);
+            this.progress_Label.TabIndex = 26;
+            this.progress_Label.Text = "Retrieved Links: ";
+            this.progress_Label.Visible = false;
+            // 
+            // speed_Label
+            // 
+            this.speed_Label.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.speed_Label.AutoSize = true;
+            this.speed_Label.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.speed_Label.Location = new System.Drawing.Point(1045, 405);
+            this.speed_Label.Name = "speed_Label";
+            this.speed_Label.Size = new System.Drawing.Size(99, 15);
+            this.speed_Label.TabIndex = 25;
+            this.speed_Label.Text = "Download Speed:";
+            this.speed_Label.Visible = false;
+            // 
+            // label_Close
+            // 
+            this.label_Close.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.label_Close.AutoSize = true;
+            this.label_Close.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.label_Close.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Underline, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label_Close.Location = new System.Drawing.Point(1158, 37);
+            this.label_Close.Name = "label_Close";
+            this.label_Close.Size = new System.Drawing.Size(83, 15);
+            this.label_Close.TabIndex = 28;
+            this.label_Close.Text = "Close Window";
+            this.label_Close.Click += new System.EventHandler(this.label_Close_Click);
+            // 
+            // lstDownloadLinks
+            // 
+            this.lstDownloadLinks.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.lstDownloadLinks.FormattingEnabled = true;
+            this.lstDownloadLinks.HorizontalScrollbar = true;
+            this.lstDownloadLinks.Location = new System.Drawing.Point(1046, 59);
+            this.lstDownloadLinks.Name = "lstDownloadLinks";
+            this.lstDownloadLinks.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
+            this.lstDownloadLinks.Size = new System.Drawing.Size(301, 316);
+            this.lstDownloadLinks.Sorted = true;
+            this.lstDownloadLinks.TabIndex = 16;
+            this.lstDownloadLinks.Visible = false;
+            this.lstDownloadLinks.KeyDown += new System.Windows.Forms.KeyEventHandler(this.lstDownloadLinks_KeyDown);
             // 
             // Main
             // 
@@ -308,6 +386,12 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Window;
             this.ClientSize = new System.Drawing.Size(1052, 465);
+            this.Controls.Add(this.label_Close);
+            this.Controls.Add(this.progress_Label);
+            this.Controls.Add(this.speed_Label);
+            this.Controls.Add(this.progressBar1);
+            this.Controls.Add(this.button_Download);
+            this.Controls.Add(this.lstDownloadLinks);
             this.Controls.Add(this.label_Saved);
             this.Controls.Add(this.button_Settings);
             this.Controls.Add(this.label1);
@@ -324,7 +408,7 @@
             this.Controls.Add(this.textBox_Search);
             this.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.MinimumSize = new System.Drawing.Size(900, 200);
+            this.MinimumSize = new System.Drawing.Size(1000, 300);
             this.Name = "Main";
             this.Text = "Torrent Searcher";
             this.Load += new System.EventHandler(this.Form1_Load);
@@ -358,6 +442,12 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn Leechers;
         private System.Windows.Forms.DataGridViewTextBoxColumn SearchEngine;
         private System.Windows.Forms.Label label_Saved;
+        private CustomListBox lstDownloadLinks;
+        private System.Windows.Forms.Button button_Download;
+        private System.Windows.Forms.ProgressBar progressBar1;
+        private System.Windows.Forms.Label progress_Label;
+        private System.Windows.Forms.Label speed_Label;
+        private System.Windows.Forms.Label label_Close;
     }
 }
 

@@ -305,7 +305,6 @@
             this.lstDownloadLinks.Sorted = true;
             this.lstDownloadLinks.TabIndex = 25;
             this.lstDownloadLinks.KeyDown += new System.Windows.Forms.KeyEventHandler(this.lstDownloadLinks_KeyDown);
-            this.lstDownloadLinks.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.lstDownloadLinks_MouseDoubleClick);
             // 
             // Data
             // 

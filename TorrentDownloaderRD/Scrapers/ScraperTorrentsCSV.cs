@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Globalization;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 
@@ -9,36 +11,67 @@ namespace MediaDownloader.Scrapers
     {
         private static readonly HttpClient httpClient = new HttpClient();
 
-        public static async Task ScrapeTorrentsAsync(string searchText, int numberOfResults, Action<TorrentInfo> updateCallback)
+        public static async Task ScrapeTorrentsAsync(string searchText, int numberOfResults, Action<TorrentInfo> updateCallback, int timeoutDelay, CancellationToken cancellationToken)
         {
             string apiUrl = $"https://torrents-csv.com/service/search?q={searchText}&size={numberOfResults}";
-            using (var client = new HttpClient())
+
+            try
             {
-                var response = await client.GetStringAsync(apiUrl);
+                var response = await LoadFromWebWithTimeoutAsync(apiUrl, TimeSpan.FromSeconds(timeoutDelay), cancellationToken);
+
+                if (response == null)
+                {
+                    return;
+                }
+
                 var json = JObject.Parse(response);
 
                 foreach (var torrent in json["torrents"])
                 {
-                    var name = torrent["name"].ToString();
-                    var magnetLink = $"magnet:?xt=urn:btih:{torrent["infohash"]}";
-
-                    Main.magnetLinksCSV[name] = magnetLink;
-
-                    var torrentInfo = new TorrentInfo
+                    if (cancellationToken.IsCancellationRequested)
                     {
-                        Name = name,
-                        Size = ConvertBytesToReadableSize(long.Parse(torrent["size_bytes"].ToString())).ToString(),
-                        Seeders = int.Parse(torrent["seeders"].ToString()),
-                        Leechers = int.Parse(torrent["leechers"].ToString()),
-                        Url = $"https://torrents-csv.com/torrent/{torrent["rowid"]}",
-                        Magnet = magnetLink
-                    };
+                        return;
+                    }
+
+                    var torrentInfo = ExtractTorrentInfoFromJson(torrent);
+
+                    Main.magnetLinksCSV[torrentInfo.Name] = torrentInfo.Magnet;
 
                     updateCallback?.Invoke(torrentInfo);
                 }
             }
+            catch (TaskCanceledException)
+            {
+                // Handle task cancellation due to timeout or cancellation token
+                // Console.WriteLine("Task was canceled.");
+            }
+            catch (Exception ex)
+            {
+                // Handle other errors
+                // Console.WriteLine($"Error scraping Torrents CSV: {ex.Message}");
+            }
         }
 
+        private static async Task<string> LoadFromWebWithTimeoutAsync(string url, TimeSpan timeout, CancellationToken cancellationToken)
+        {
+            using (var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken))
+            {
+                cts.CancelAfter(timeout);
+                try
+                {
+                    var response = await httpClient.GetAsync(url, cts.Token);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        return await response.Content.ReadAsStringAsync();
+                    }
+                    return null;
+                }
+                catch (OperationCanceledException)
+                {
+                    return null;
+                }
+            }
+        }
 
         private static TorrentInfo ExtractTorrentInfoFromJson(JToken torrent)
         {
@@ -74,7 +107,9 @@ namespace MediaDownloader.Scrapers
                 size /= 1024;
             }
 
-            return $"{size:F2} {sizeUnits[unitIndex]}";
+            //return $"{size:F2} {sizeUnits[unitIndex]}";
+
+            return string.Format(CultureInfo.InvariantCulture, "{0:F2} {1}", size, sizeUnits[unitIndex]);
         }
     }
 }

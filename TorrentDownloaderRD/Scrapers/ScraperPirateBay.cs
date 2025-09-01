@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Drawing;
+using System.Globalization;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using Newtonsoft.Json.Linq;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace MediaDownloader.Scrapers
 {
@@ -10,7 +13,7 @@ namespace MediaDownloader.Scrapers
     {
         private static readonly HttpClient httpClient = new HttpClient();
 
-        public static async Task ScrapeTorrentsAsync(string searchText, int numberOfResults, string contentItem, Action<TorrentInfo> updateCallback)
+        public static async Task ScrapeTorrentsAsync(string searchText, int numberOfResults, string contentItem, Action<TorrentInfo> updateCallback, int timeoutDelay, CancellationToken cancellationToken)
         {
             if (string.IsNullOrEmpty(searchText)) return;
 
@@ -21,40 +24,59 @@ namespace MediaDownloader.Scrapers
             else if (contentItem == "XXX") { ContentItemParsed = "&cat=501"; }
 
             string BaseUrl = "https://apibay.org";
-            string url = "";
-            if (ContentItemParsed != "")
+            string url = string.IsNullOrEmpty(ContentItemParsed) ?
+                $"{BaseUrl}/q.php?q={searchText.Replace(" ", "+")}" :
+                $"{BaseUrl}/q.php?q={searchText.Replace(" ", "+")}{ContentItemParsed}";
+
+            try
             {
-                url = $"{BaseUrl}/q.php?q={searchText.Replace(" ", "+")}{ContentItemParsed}";
-            }
-            else if (ContentItemParsed == "")
-            {
-                url = $"{BaseUrl}/q.php?q={searchText.Replace(" ", "+")}";
-            }
-
-            var response = await httpClient.GetStringAsync(url);
-            var torrents = JArray.Parse(response);
-
-            foreach (var torrent in torrents)
-            {
-                if (torrent["id"] == null || torrent["info_hash"] == null) continue;
-
-                var name = torrent["name"].ToString();
-                var magnetLink = $"magnet:?xt=urn:btih:{torrent["info_hash"]}";
-
-                // Store the magnet link in the dictionary using the torrent name as the key
-                Main.magnetLinksPirate[name] = magnetLink;
-
-                var torrentInfo = new TorrentInfo
+                using (var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken))
                 {
-                    Name = name,
-                    Size = ConvertBytesToReadableSize(long.Parse(torrent["size"].ToString())),
-                    Seeders = int.Parse(torrent["seeders"].ToString()),
-                    Leechers = int.Parse(torrent["leechers"].ToString()),
-                    Url = $"https://thepiratebay.org/description.php?id={torrent["id"]}",
-                    Magnet = magnetLink
-                };
+                    // Set timeout
+                    cts.CancelAfter(TimeSpan.FromSeconds(timeoutDelay));
 
-                updateCallback?.Invoke(torrentInfo);
+                    // Make the request with a cancellation token
+                    var response = await httpClient.GetAsync(url, cts.Token);
+                    response.EnsureSuccessStatusCode();
+
+                    var responseString = await response.Content.ReadAsStringAsync();
+                    var torrents = JArray.Parse(responseString);
+
+                    foreach (var torrent in torrents)
+                    {
+                        if (cancellationToken.IsCancellationRequested) return; // Check if cancellation was requested
+
+                        if (torrent["id"] == null || torrent["info_hash"] == null) continue;
+
+                        var name = torrent["name"].ToString();
+                        var magnetLink = $"magnet:?xt=urn:btih:{torrent["info_hash"]}";
+
+                        // Store the magnet link in the dictionary using the torrent name as the key
+                        Main.magnetLinksPirate[name] = magnetLink;
+
+                        var torrentInfo = new TorrentInfo
+                        {
+                            Name = name,
+                            Size = ConvertBytesToReadableSize(long.Parse(torrent["size"].ToString())),
+                            Seeders = int.Parse(torrent["seeders"].ToString()),
+                            Leechers = int.Parse(torrent["leechers"].ToString()),
+                            Url = $"https://thepiratebay.org/description.php?id={torrent["id"]}",
+                            Magnet = magnetLink
+                        };
+
+                        updateCallback?.Invoke(torrentInfo);
+                    }
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                // Handle cancellation or timeout
+                // Console.WriteLine("Task was canceled due to timeout or user request.");
+            }
+            catch (Exception ex)
+            {
+                // Handle any other exceptions
+                // Console.WriteLine($"Error scraping Pirate Bay: {ex.Message}");
             }
         }
 
@@ -70,7 +92,9 @@ namespace MediaDownloader.Scrapers
                 size /= 1024;
             }
 
-            return $"{size:F2} {sizeUnits[unitIndex]}";
+            //return $"{size:F2} {sizeUnits[unitIndex]}";
+
+            return string.Format(CultureInfo.InvariantCulture, "{0:F2} {1}", size, sizeUnits[unitIndex]);
         }
     }
 }

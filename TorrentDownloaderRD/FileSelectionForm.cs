@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reflection.Emit;
 using System.Runtime.InteropServices;
@@ -14,7 +15,6 @@ namespace MediaDownloader
         private static extern IntPtr LoadCursor(IntPtr hInstance, int lpCursorName);
 
         private const int IDC_HAND = 32649;
-
 
         private readonly TorrentFile[] _files;
         public string[] SelectedFileIds { get; private set; }
@@ -71,7 +71,7 @@ namespace MediaDownloader
                 order++;
                 len = len / 1024;
             }
-            return $"{len:0.##} {sizes[order]}";
+            return string.Format(CultureInfo.InvariantCulture, "{0:0.00} {1}", len, sizes[order]);
         }
 
         private void tvFiles_AfterCheck(object sender, TreeViewEventArgs e)

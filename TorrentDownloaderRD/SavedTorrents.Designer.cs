@@ -38,6 +38,7 @@
             // 
             // progress_Label
             // 
+            this.progress_Label.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.progress_Label.AutoSize = true;
             this.progress_Label.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.progress_Label.Location = new System.Drawing.Point(11, 543);
@@ -45,12 +46,14 @@
             this.progress_Label.Size = new System.Drawing.Size(89, 15);
             this.progress_Label.TabIndex = 30;
             this.progress_Label.Text = "Retrieved Links:";
+            this.progress_Label.Visible = false;
             // 
             // button_Download
             // 
+            this.button_Download.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_Download.BackColor = System.Drawing.Color.Transparent;
             this.button_Download.Enabled = false;
-            this.button_Download.Location = new System.Drawing.Point(579, 546);
+            this.button_Download.Location = new System.Drawing.Point(580, 546);
             this.button_Download.Name = "button_Download";
             this.button_Download.Size = new System.Drawing.Size(120, 27);
             this.button_Download.TabIndex = 29;
@@ -60,6 +63,7 @@
             // 
             // speed_Label
             // 
+            this.speed_Label.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.speed_Label.AutoSize = true;
             this.speed_Label.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.speed_Label.Location = new System.Drawing.Point(11, 561);
@@ -71,7 +75,9 @@
             // 
             // progressBar1
             // 
-            this.progressBar1.Location = new System.Drawing.Point(12, 579);
+            this.progressBar1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.progressBar1.Location = new System.Drawing.Point(12, 580);
             this.progressBar1.Name = "progressBar1";
             this.progressBar1.Size = new System.Drawing.Size(687, 23);
             this.progressBar1.TabIndex = 27;
@@ -79,6 +85,8 @@
             // 
             // lstDownloadLinks
             // 
+            this.lstDownloadLinks.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.lstDownloadLinks.FormattingEnabled = true;
             this.lstDownloadLinks.ItemHeight = 15;
             this.lstDownloadLinks.Location = new System.Drawing.Point(12, 401);
@@ -92,12 +100,16 @@
             // 
             // customListBox1
             // 
+            this.customListBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.customListBox1.FormattingEnabled = true;
             this.customListBox1.ItemHeight = 15;
             this.customListBox1.Location = new System.Drawing.Point(12, 12);
             this.customListBox1.Name = "customListBox1";
             this.customListBox1.Size = new System.Drawing.Size(687, 379);
             this.customListBox1.TabIndex = 1;
+            this.customListBox1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.customListBox1_KeyDown);
             this.customListBox1.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.customListBox1_MouseDoubleClick);
             // 
             // SavedTorrents
@@ -114,7 +126,7 @@
             this.Controls.Add(this.customListBox1);
             this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.MinimumSize = new System.Drawing.Size(582, 351);
+            this.MinimumSize = new System.Drawing.Size(582, 352);
             this.Name = "SavedTorrents";
             this.Text = "Saved Torrents";
             this.Load += new System.EventHandler(this.SavedTorrents_Load);
@@ -124,12 +136,11 @@
         }
 
         #endregion
-
-        private CustomListBox customListBox1;
         private CustomListBox lstDownloadLinks;
         private System.Windows.Forms.Label progress_Label;
         private System.Windows.Forms.Button button_Download;
         private System.Windows.Forms.Label speed_Label;
         private System.Windows.Forms.ProgressBar progressBar1;
+        private CustomListBox customListBox1;
     }
 }
