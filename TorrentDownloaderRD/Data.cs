@@ -645,7 +645,6 @@ namespace MediaDownloader
 
                 if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
                 {
-                    MessageBox.Show("Download is Starting");
                     string downloadDirectory = folderBrowserDialog.SelectedPath;
                     await DownloadFilesAsync(downloadDirectory);
                 }

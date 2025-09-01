@@ -8,6 +8,7 @@ using System.Net;
 using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -61,62 +62,70 @@ namespace TorrentDownloaderRD
 
         public static async Task<(bool isUp, int statusCode)> IsWebsiteUpAsync(string url)
         {
+            const int TIMEOUT_STATUS = -1;
+
             int retryCount = 3;
             for (int i = 0; i < retryCount; i++)
             {
                 try
                 {
-                    using (HttpResponseMessage response = await client.GetAsync(url))
+                    using (var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15)))
+                    using (HttpResponseMessage response =
+                           await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, cts.Token))
                     {
                         return (response.IsSuccessStatusCode, (int)response.StatusCode);
                     }
                 }
-                catch (TaskCanceledException)
+                catch (TaskCanceledException)   // 15-s timeout
                 {
-                    if (i == retryCount - 1) // Last retry
-                    {
-                        Console.WriteLine($"Request timed out for {url}");
-                        return (false, 0);
-                    }
-                    await Task.Delay(1000); // Wait 1 second before retrying
+                    if (i == retryCount - 1) return (false, TIMEOUT_STATUS);
+                    await Task.Delay(1000);
                 }
-                catch (HttpRequestException ex)
+                catch (HttpRequestException)    // network / dns / ssl errors
                 {
-                    Console.WriteLine($"Request failed for {url}: {ex.Message}");
-                    return (false, 0);
+                    return (false, TIMEOUT_STATUS);
                 }
             }
-            return (false, 0);
+            return (false, TIMEOUT_STATUS);
         }
-
-        /*public static async Task CheckWebsiteAndUpdateLabel(string url, Label label)
-        {
-            var result = await IsWebsiteUpAsync(url);
-            if (result.isUp)
-            {
-                label.ForeColor = Color.Green;
-            }
-            else
-            {
-                label.ForeColor = Color.Red;
-                label.Text = $"{label.Text} - Status Code: {result.statusCode}";
-            }
-        }*/
 
         public static async Task CheckWebsiteAndUpdateLabel(string url, Label label, ProgressBar progressBar, IProgress<int> progress)
         {
-            var result = await IsWebsiteUpAsync(url);
-            if (result.isUp)
+            try
             {
-                label.ForeColor = Color.Green;
-            }
-            else
-            {
-                label.ForeColor = Color.Red;
-                label.Text = $"{label.Text} - Status Code: {result.statusCode}";
-            }
+                var (isUp, statusCode) = await IsWebsiteUpAsync(url);
 
-            progress.Report(1);
+                label.Invoke(new Action(() =>
+                {
+                    if (isUp)
+                    {
+                        label.ForeColor = Color.Green;
+                        // strip any previous status suffix
+                        label.Text = label.Text.Split('-')[0].Trim();
+                    }
+                    else
+                    {
+                        string statusText = statusCode == -1
+                            ? "error loading"
+                            : statusCode.ToString();
+
+                        label.ForeColor = Color.Red;
+                        label.Text = $"{label.Text.Split('-')[0].Trim()} - {statusText}";
+                    }
+                }));
+            }
+            catch
+            {
+                label.Invoke(new Action(() =>
+                {
+                    label.ForeColor = Color.Red;
+                    label.Text = $"{label.Text.Split('-')[0].Trim()} - error loading";
+                }));
+            }
+            finally
+            {
+                progress.Report(1);
+            }
         }
 
         public static async Task CheckMultipleWebsites(Form form)

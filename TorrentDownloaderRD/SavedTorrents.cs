@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -13,6 +14,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using TorrentDownloaderRD.Processing;
+using static RealDebridAPI.RealDebridClient;
 using static TorrentDownloaderRD.Processing.AllDebridClient;
 
 namespace MediaDownloader
@@ -24,6 +26,7 @@ namespace MediaDownloader
         private bool _isDownloadRunning = false;
         private bool _cancellationToken = false;
         private List<string> listIDs = new List<string>();
+        private string currentProvider;
 
         public SavedTorrents()
         {
@@ -41,64 +44,228 @@ namespace MediaDownloader
             lstDownloadLinks.Items.Clear();
             string torrentStatus = "";
 
-            try
+            if (currentProvider == "Real-Debrid")
             {
-                string selectedItem = customListBox1.SelectedItem.ToString();
-                string match = listIDs[customListBox1.SelectedIndex];
-                //var match = Regex.Split(selectedItem, ", ID: ");
-
-                RealDebridClient.TorrentInfo torrentInfo = await _realDebridClient.GetTorrentInfoAsync(match); //match[1]
-                torrentStatus = torrentInfo.Status;
-
-                Dictionary<string, string> backupDownloadLinks = null;
-                backupDownloadLinks = await _realDebridClient.GetDownloadLinksFromIDAsync(match); //match[1]
-
-                var usedLinks = new HashSet<string>();
-
-                if (backupDownloadLinks != null)
+                try
                 {
-                    if (torrentStatus == "downloaded")
+                    string selectedItem = customListBox1.SelectedItem.ToString();
+                    string match = listIDs[customListBox1.SelectedIndex];
+                    //var match = Regex.Split(selectedItem, ", ID: ");
+
+                    RealDebridClient.TorrentInfo torrentInfo = await _realDebridClient.GetTorrentInfoAsync(match); //match[1]
+                    torrentStatus = torrentInfo.Status;
+
+                    Dictionary<string, string> backupDownloadLinks = null;
+                    backupDownloadLinks = await _realDebridClient.GetDownloadLinksFromIDAsync(match); //match[1]
+
+                    var usedLinks = new HashSet<string>();
+
+                    if (backupDownloadLinks != null)
                     {
-                        string downloadLinksToCopy = "";
-
-                        foreach (var kvp in backupDownloadLinks)
+                        if (torrentStatus == "downloaded")
                         {
-                            if (!string.IsNullOrWhiteSpace(kvp.Value) && !usedLinks.Contains(kvp.Value))
+                            string downloadLinksToCopy = "";
+
+                            foreach (var kvp in backupDownloadLinks)
                             {
-                                lstDownloadLinks.Items.Add($"{kvp.Key}: {kvp.Value}");
-                                usedLinks.Add(kvp.Value);
+                                if (!string.IsNullOrWhiteSpace(kvp.Value) && !usedLinks.Contains(kvp.Value))
+                                {
+                                    lstDownloadLinks.Items.Add($"{kvp.Key}: {kvp.Value}");
+                                    usedLinks.Add(kvp.Value);
 
-                                downloadLinksToCopy += kvp.Value + " ";
+                                    downloadLinksToCopy += kvp.Value + " ";
 
+                                }
+                            }
+
+                            System.Windows.Forms.Clipboard.SetText(downloadLinksToCopy);
+                        }
+                        else
+                        {
+                            // If the torrent isnt downloaded, ask user to delete
+
+                            DialogResult result = MessageBox.Show($"Torrent Status is Currently: {torrentStatus},\nDelete from Real-Debrid? ", "Confirmation", MessageBoxButtons.YesNo);
+                            if (result == DialogResult.Yes)
+                            {
+                                await _realDebridClient.DeleteTorrentAsync(match); //match[1]
+                                customListBox1.Items.Clear();
+                                getFiles();
                             }
                         }
-
-                        button_Download.Enabled = true;
-                        progress_Label.Text = "Retrieved Links: " + lstDownloadLinks.Items.Count.ToString();
-                        System.Windows.Forms.Clipboard.SetText(downloadLinksToCopy);
                     }
                     else
                     {
-                        // If the torrent isnt downloaded, ask user to delete
-
-                        DialogResult result = MessageBox.Show($"Torrent Status is Currently: {torrentStatus},\nDelete from Real-Debrid? ", "Confirmation", MessageBoxButtons.YesNo);
-                        if (result == DialogResult.Yes)
-                        {
-                            await _realDebridClient.DeleteTorrentAsync(match); //match[1]
-                            customListBox1.Items.Clear();
-                            getFiles();
-                        }
+                        MessageBox.Show("Download Links are Empty");
                     }
                 }
-                else
+                catch
                 {
-                    MessageBox.Show("Download Links are Empty");
+                    MessageBox.Show("Error Getting Download Links");
+                }
+                finally
+                {
+                    long totalSizeInBytes = 0;
+                    foreach (string item in lstDownloadLinks.Items)
+                    {
+                        var match = Regex.Match(item, @"\[(\d+\.?\d*)\s*(B|KB|MB|GB|TB)\]");
+
+                        if (match.Success)
+                        {
+                            double fileSize = double.Parse(match.Groups[1].Value, System.Globalization.CultureInfo.InvariantCulture);
+
+                            string unitPart = match.Groups[2].Value.ToUpper();
+
+                            long sizeInBytes = 0;
+                            switch (unitPart)
+                            {
+                                case "B":
+                                    sizeInBytes = (long)fileSize;
+                                    break;
+                                case "KB":
+                                    sizeInBytes = (long)(fileSize * 1024);
+                                    break;
+                                case "MB":
+                                    sizeInBytes = (long)(fileSize * 1024 * 1024);
+                                    break;
+                                case "GB":
+                                    sizeInBytes = (long)(fileSize * 1024 * 1024 * 1024);
+                                    break;
+                                case "TB":
+                                    sizeInBytes = (long)(fileSize * 1024 * 1024 * 1024 * 1024L);
+                                    break;
+                                default:
+                                    MessageBox.Show("Unknown file size unit: " + unitPart);
+                                    break;
+                            }
+                            totalSizeInBytes += sizeInBytes;
+                        }
+                        else
+                        {
+                            MessageBox.Show("Failed to parse size from item: " + item);
+                        }
+                    }
+                    double totalSizeInGB = totalSizeInBytes / (1024.0 * 1024 * 1024);
+
+                    progress_Label.Visible = true;
+                    button_Download.Enabled = true;
+                    progress_Label.Text = "Retrieved Links: " + lstDownloadLinks.Items.Count.ToString() + " , Total Size: " + FormatFileSize(totalSizeInBytes);
                 }
             }
-            catch
+            else if (currentProvider == "AllDebrid")
             {
-                MessageBox.Show("Error Getting Download Links");
+                try
+                {
+                    string selectedItem = customListBox1.SelectedItem.ToString();
+                    string match = listIDs[customListBox1.SelectedIndex];
+                    var usedLinks = new HashSet<string>();
+
+                    var magnet = await _allDebridClient.GetStatusByIDAsync((long)Convert.ToDouble(match));
+                    if (magnet.StatusCode == 4)
+                    {
+                        string downloadLinksToCopy = "";
+
+                        var files = await _allDebridClient.GetDownloadableFilesAsync((long)Convert.ToDouble(match));
+
+                        if (files.Count == 0)
+                        {
+                            MessageBox.Show("No files available for download.");
+                        }
+                        else
+                        {
+                            foreach (var file in files)
+                            {
+                                if (!string.IsNullOrWhiteSpace(file.Name) && !usedLinks.Contains(file.Link))
+                                {
+                                    lstDownloadLinks.Items.Add($"{file.Name}: {file.Link} [{ConvertFileSize(file.Size)}]");
+                                    usedLinks.Add(file.Link);
+
+                                    downloadLinksToCopy += file.Link + " ";
+                                }
+                            }
+
+                            System.Windows.Forms.Clipboard.SetText(downloadLinksToCopy);
+                        }                        
+                    }
+                }
+                catch
+                {
+                    MessageBox.Show("Error Getting Download Links");
+                }
+                finally
+                {
+                    long totalSizeInBytes = 0;
+                    foreach (string item in lstDownloadLinks.Items)
+                    {
+                        var match = Regex.Match(item, @"\[(\d+\.?\d*)\s*(B|KB|MB|GB|TB)\]");
+
+                        if (match.Success)
+                        {
+                            double fileSize = double.Parse(match.Groups[1].Value, System.Globalization.CultureInfo.InvariantCulture);
+
+                            string unitPart = match.Groups[2].Value.ToUpper();
+
+                            long sizeInBytes = 0;
+                            switch (unitPart)
+                            {
+                                case "B":
+                                    sizeInBytes = (long)fileSize;
+                                    break;
+                                case "KB":
+                                    sizeInBytes = (long)(fileSize * 1024);
+                                    break;
+                                case "MB":
+                                    sizeInBytes = (long)(fileSize * 1024 * 1024);
+                                    break;
+                                case "GB":
+                                    sizeInBytes = (long)(fileSize * 1024 * 1024 * 1024);
+                                    break;
+                                case "TB":
+                                    sizeInBytes = (long)(fileSize * 1024 * 1024 * 1024 * 1024L);
+                                    break;
+                                default:
+                                    MessageBox.Show("Unknown file size unit: " + unitPart);
+                                    break;
+                            }
+                            totalSizeInBytes += sizeInBytes;
+                        }
+                        else
+                        {
+                            MessageBox.Show("Failed to parse size from item: " + item);
+                        }
+                    }
+                    double totalSizeInGB = totalSizeInBytes / (1024.0 * 1024 * 1024);
+
+                    progress_Label.Visible = true;
+                    button_Download.Enabled = true;
+                    progress_Label.Text = "Retrieved Links: " + lstDownloadLinks.Items.Count.ToString() + " , Total Size: " + FormatFileSize(totalSizeInBytes);
+                }
             }
+        }
+
+        private string ConvertFileSize(long bytes)
+        {
+            string[] sizes = { "B", "KB", "MB", "GB", "TB" };
+            double len = bytes;
+            int order = 0;
+            while (len >= 1024 && order < sizes.Length - 1)
+            {
+                order++;
+                len = len / 1024;
+            }
+            return string.Format(CultureInfo.InvariantCulture, "{0:0.00} {1}", len, sizes[order]);
+        }
+
+        public string FormatFileSize(long bytes)
+        {
+            if (bytes >= 1_099_511_627_776) // TB
+                return (bytes / 1_099_511_627_776D).ToString("0.00", CultureInfo.InvariantCulture) + " TB";
+            if (bytes >= 1_073_741_824) // GB
+                return (bytes / 1_073_741_824D).ToString("0.00", CultureInfo.InvariantCulture) + " GB";
+            if (bytes >= 1_048_576) // MB
+                return (bytes / 1_048_576D).ToString("0.00", CultureInfo.InvariantCulture) + " MB";
+            if (bytes >= 1024) // KB
+                return (bytes / 1024D).ToString("0.00", CultureInfo.InvariantCulture) + " KB";
+            return bytes + " bytes";
         }
 
         private void getFiles()
@@ -118,6 +285,8 @@ namespace MediaDownloader
                     if (GetAPIProvider == "Real-Debrid")
                     {
                         APIKey = lines[1].Replace("Real-Debrid API Key: ", "");
+                        currentProvider = "Real-Debrid";
+                        this.Text = "Saved Torrents - Real Debrid";
 
                         if (APIKey == "")
                         {
@@ -148,6 +317,8 @@ namespace MediaDownloader
                     else if (GetAPIProvider == "AllDebrid")
                     {
                         APIKey = lines[2].Replace("AllDebrid API Key: ", "");
+                        currentProvider = "AllDebrid";
+                        this.Text = "Saved Torrents - AllDebrid";
 
                         if (APIKey == "")
                         {
@@ -296,7 +467,6 @@ namespace MediaDownloader
 
                 if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
                 {
-                    MessageBox.Show("Download is Starting");
                     string downloadDirectory = folderBrowserDialog.SelectedPath;
                     await DownloadFilesAsync(downloadDirectory);
                 }
@@ -334,7 +504,9 @@ namespace MediaDownloader
                     }
 
                     var splitLinks = Regex.Split(item.ToString(), ": http");
-                    string downloadUrl = "http" + splitLinks[1];
+
+                    var completeUrl = Regex.Split("http" + splitLinks[1], " ");
+                    string downloadUrl = completeUrl[0];
 
                     string fullPath = splitLinks[0].Trim();
 
@@ -349,77 +521,169 @@ namespace MediaDownloader
                     // Combine the executable directory and the relative path to form the complete local file path.
                     string localFilePath = Path.Combine(downloadDirectory, relativePath);
 
-                    // Assign API Key
-                    string[] lines = File.ReadAllLines("Settings.txt");
-                    string APIKey = lines[0].Replace("API Key: ", "");
-
-                    if (APIKey == "")
+                    if (splitLinks[1].Contains("real-debrid.com"))
                     {
-                        MessageBox.Show("Real Debrid API Key Not Found\nUsing Its Service Will Be Disabled");
-                        return;
-                    }
-                    else
-                    {
-                        _realDebridClient = new RealDebridClient(APIKey);
-                    }
+                        string[] lines = System.IO.File.ReadAllLines("Settings.txt");
+                        string APIKey = lines[1].Replace("Real-Debrid API Key: ", "");
 
-                    string unrestrictedLink = await _realDebridClient.UnrestrictLinkAsync(downloadUrl);
-
-                    // Ensure the directory exists.
-                    string localDirectory = Path.GetDirectoryName(localFilePath);
-                    if (!Directory.Exists(localDirectory))
-                    {
-                        Directory.CreateDirectory(localDirectory);
-                    }
-
-                    // Download
-                    using (WebClient wc = new WebClient())
-                    {
-                        Stopwatch stopwatch = new Stopwatch();
-                        long totalBytesReceived = 0;
-                        Timer timer = new Timer();
-                        timer.Interval = 1000; // Update download speed every 1000ms
-                        timer.Tick += (timerSender, timerEventArgs) =>
+                        if (APIKey == "")
                         {
-                            if (stopwatch.IsRunning)
+                            MessageBox.Show("Real Debrid API Key Not Found\nUsing Its Service Will Be Disabled");
+                            return;
+                        }
+                        else
+                        {
+                            _realDebridClient = new RealDebridClient(APIKey);
+                        }
+
+                        string unrestrictedLink = await _realDebridClient.UnrestrictLinkAsync(downloadUrl);
+
+                        // Ensure the directory exists.
+                        string localDirectory = Path.GetDirectoryName(localFilePath);
+                        if (!Directory.Exists(localDirectory))
+                        {
+                            Directory.CreateDirectory(localDirectory);
+                        }
+
+                        // Download
+                        using (WebClient wc = new WebClient())
+                        {
+                            Stopwatch stopwatch = new Stopwatch();
+                            long totalBytesReceived = 0;
+                            Timer timer = new Timer();
+                            timer.Interval = 1000; // Update download speed every 1000ms
+                            timer.Tick += (timerSender, timerEventArgs) =>
                             {
-                                double elapsedSeconds = stopwatch.Elapsed.TotalSeconds;
-                                double downloadSpeed = (totalBytesReceived / 1024d / 1024d) / elapsedSeconds;
-                                speed_Label.Text = $"Download Speed: {downloadSpeed.ToString("0.00")} MB/s";
-                            }
-                        };
+                                if (stopwatch.IsRunning)
+                                {
+                                    double elapsedSeconds = stopwatch.Elapsed.TotalSeconds;
+                                    double downloadSpeed = (totalBytesReceived / 1024d / 1024d) / elapsedSeconds;
+                                    speed_Label.Text = $"Download Speed: {downloadSpeed.ToString("0.00")} MB/s";
+                                }
+                            };
 
-                        // Update Progress
-                        wc.DownloadProgressChanged += (progressSender, progressChangedEventArgs) =>
-                        {
-                            if (!stopwatch.IsRunning)
+                            // Update Progress
+                            wc.DownloadProgressChanged += (progressSender, progressChangedEventArgs) =>
                             {
-                                stopwatch.Start();
-                                timer.Start();
-                            }
+                                if (!stopwatch.IsRunning)
+                                {
+                                    stopwatch.Start();
+                                    timer.Start();
+                                }
 
-                            totalBytesReceived = progressChangedEventArgs.BytesReceived;
-                            progressBar1.Value = progressChangedEventArgs.ProgressPercentage;
-                        };
+                                totalBytesReceived = progressChangedEventArgs.BytesReceived;
+                                progressBar1.Value = progressChangedEventArgs.ProgressPercentage;
+                            };
 
-                        wc.DownloadFileCompleted += (completedSender, downloadFileCompletedEventArgs) =>
-                        {
-                            stopwatch.Reset();
-                            timer.Stop();
-                            downloadedFiles++;
+                            wc.DownloadFileCompleted += (completedSender, downloadFileCompletedEventArgs) =>
+                            {
+                                stopwatch.Reset();
+                                timer.Stop();
+                                downloadedFiles++;
+                                progress_Label.Text = $"Downloaded: {downloadedFiles}/{totalFiles} Files";
+
+                                // Check if all files are downloaded
+                                if (downloadedFiles == totalFiles)
+                                {
+                                    speed_Label.Text = "Download Speed: Completed";
+                                }
+                            };
+
+                            // Update the progress label before starting the download
                             progress_Label.Text = $"Downloaded: {downloadedFiles}/{totalFiles} Files";
 
-                            // Check if all files are downloaded
-                            if (downloadedFiles == totalFiles)
+                            await wc.DownloadFileTaskAsync(new Uri(unrestrictedLink), localFilePath);
+                        }
+
+                        for (int i = lstDownloadLinks.Items.Count - 1; i >= 0; i--)
+                        {
+                            if (lstDownloadLinks.Items[i].ToString().Contains(item))
                             {
-                                speed_Label.Text = "Download Speed: Completed";
+                                lstDownloadLinks.Items.RemoveAt(i);
                             }
-                        };
+                        }
+                    }
+                    else if (splitLinks[1].Contains("alldebrid.com"))
+                    {
+                        string[] lines = System.IO.File.ReadAllLines("Settings.txt");
+                        string APIKey = lines[2].Replace("AllDebrid API Key: ", "");
 
-                        // Update the progress label before starting the download
-                        progress_Label.Text = $"Downloaded: {downloadedFiles}/{totalFiles} Files";
+                        if (APIKey == "")
+                        {
+                            MessageBox.Show("AllDebrid API Key Not Found\nUsing Its Service Will Be Disabled");
+                            return;
+                        }
+                        else
+                        {
+                            _allDebridClient = new AllDebridClient(APIKey);
+                        }
 
-                        await wc.DownloadFileTaskAsync(new Uri(unrestrictedLink), localFilePath);
+                        var unrestrictedLink = await _allDebridClient.UnlockLinkAsync(downloadUrl);
+
+                        // Ensure the directory exists.
+                        string localDirectory = Path.GetDirectoryName(localFilePath);
+                        if (!Directory.Exists(localDirectory))
+                        {
+                            Directory.CreateDirectory(localDirectory);
+                        }
+
+                        // Download
+                        using (WebClient wc = new WebClient())
+                        {
+                            Stopwatch stopwatch = new Stopwatch();
+                            long totalBytesReceived = 0;
+                            Timer timer = new Timer();
+                            timer.Interval = 1000; // Update download speed every 1000ms
+                            timer.Tick += (timerSender, timerEventArgs) =>
+                            {
+                                if (stopwatch.IsRunning)
+                                {
+                                    double elapsedSeconds = stopwatch.Elapsed.TotalSeconds;
+                                    double downloadSpeed = (totalBytesReceived / 1024d / 1024d) / elapsedSeconds;
+                                    speed_Label.Text = $"Download Speed: {downloadSpeed.ToString("0.00")} MB/s";
+                                }
+                            };
+
+                            // Update Progress
+                            wc.DownloadProgressChanged += (progressSender, progressChangedEventArgs) =>
+                            {
+                                if (!stopwatch.IsRunning)
+                                {
+                                    stopwatch.Start();
+                                    timer.Start();
+                                }
+
+                                totalBytesReceived = progressChangedEventArgs.BytesReceived;
+                                progressBar1.Value = progressChangedEventArgs.ProgressPercentage;
+                            };
+
+                            wc.DownloadFileCompleted += (completedSender, downloadFileCompletedEventArgs) =>
+                            {
+                                stopwatch.Reset();
+                                timer.Stop();
+                                downloadedFiles++;
+                                progress_Label.Text = $"Downloaded: {downloadedFiles}/{totalFiles} Files";
+
+                                // Check if all files are downloaded
+                                if (downloadedFiles == totalFiles)
+                                {
+                                    speed_Label.Text = "Download Speed: Completed";
+                                }
+                            };
+
+                            // Update the progress label before starting the download
+                            progress_Label.Text = $"Downloaded: {downloadedFiles}/{totalFiles} Files";
+
+                            await wc.DownloadFileTaskAsync(new Uri(unrestrictedLink.Link), localFilePath);
+                        }
+
+                        for (int i = lstDownloadLinks.Items.Count - 1; i >= 0; i--)
+                        {
+                            if (lstDownloadLinks.Items[i].ToString().Contains(item))
+                            {
+                                lstDownloadLinks.Items.RemoveAt(i);
+                            }
+                        }
                     }
                 }
             }
