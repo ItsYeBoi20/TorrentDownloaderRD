@@ -1,19 +1,19 @@
 # TorrentDownloaderRD
 
-**Torrent Searcher and Downloader using the Real-Debrid API**
+**Torrent Searcher and Downloader using the Real-Debrid and AllDebrid API**
 
 ## Features
 
 ### Settings
 - **Settings.txt** is automatically created wherever the .exe is stored.
-- **API Key**: Enter your Real-Debrid API Key here.
+- **API Key**: Enter your Real-Debrid or AllDebrid API Key here.
 - **Website Selection**: Choose which website you want to search.
 - **Pages to Search**: The number of pages to search applies to each enabled provider separately.
-- **Remove Torrent**: Option to remove the torrent from Real-Debrid after download.
+- **Remove Torrent**: Option to remove the torrent from the debrid service after download.
 
 ### Viewing and Managing Torrents
-- **View Saved Torrents**: Displays all added Real-Debrid torrents (won't be added if "Remove Torrent" is enabled).
-  - **Double Click**: Shows download links which can be copied to the clipboard.
+- **View Saved Torrents**: Displays all added torrents.
+  - **Double Click** to show download links.
 
 ### Filtering and Sorting
 - **Filter Textbox**: Applies only after the initial search.
